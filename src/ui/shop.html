@@ -159,6 +159,7 @@
   <div>金币： <span id="current-gold">0</span> 💰</div>
   <div>卡槽位： <span id="current-slots">8</span></div>
   <div>能量上限： <span id="max-energy">5</span></div>
+  <div>符卡： <span id="current-bombs">0</span> 💣</div>
 </div>
 
 <div id="main-content">
@@ -170,20 +171,28 @@
     <div id="upgrade-panel">
 
       <!-- 卡槽升级 -->
-      <div class="card">
-        <img class="card-icon" src="../../picture/cards/Maxhosts.png" />
-        <div class="card-name">增加卡槽位</div>
-        <div class="card-price">100 💰</div>
-        <button class="buy-btn">购买</button>
-      </div>
+    <div class="card" data-type="slot-upgrade">
+      <img class="card-icon" src="../../picture/cards/Maxhosts.png" />
+      <div class="card-name">增加卡槽位</div>
+      <div class="card-price"><span id="slot-price">100</span> 💰</div>
+      <button class="buy-btn">购买</button>
+    </div>
 
-      <!-- 能量升级 -->
-      <div class="card">
-        <img class="card-icon" src="../../picture/cards/MaxEnergy.png" />
-        <div class="card-name">增加最大能量</div>
-        <div class="card-price">100 💰</div>
-        <button class="buy-btn">购买</button>
-      </div>
+    <!-- 能量升级 -->
+    <div class="card" data-type="energy-upgrade">
+      <img class="card-icon" src="../../picture/cards/MaxEnergy.png" />
+      <div class="card-name">增加最大能量</div>
+      <div class="card-price"><span id="energy-price">100</span> 💰</div>
+      <button class="buy-btn">购买</button>
+    </div>
+
+    
+    <div class="card" data-type="bomb-upgrade">
+      <img class="card-icon" src="../../picture/cards/blank.png" />
+      <div class="card-name">购买符卡</div>
+      <div class="card-price"><span id="bomb-price">100</span> 💰</div>
+      <button class="buy-btn">购买</button>
+    </div>
 
     </div>
   </div>

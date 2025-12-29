@@ -271,7 +271,7 @@
       }
     ]
   },
-  "money": 0,
+  "money": 580,
   "cur_room": 3,
   "health": 100,
   "bomb": 5,
@@ -281,9 +281,13 @@
     "passive001": 1,
     "passive002": 1,
     "passive003": 0,
-    "passive004": 1
+    "passive004": 1,
+    "weapon003": 1
   },
-  "max_passive_slots": 3,
-  "max_energy": 4,
-  "currentPath": []
+  "max_passive_slots": 4,
+  "max_energy": 5,
+  "currentPath": [],
+  "PostsPrice": 100,
+  "EnergyPrice": 100,
+  "BombPrice": 100
 }

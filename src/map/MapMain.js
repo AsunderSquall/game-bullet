@@ -68,7 +68,6 @@ async function renderMap() {
 
   mapContainer.innerHTML = '';
 
-  // ================ 渲染节点和层（原逻辑不变） ================
   mapData.layers.forEach((layer, layerIndex) => {
     const layerDiv = document.createElement('div');
     layerDiv.className = 'map-layer';
