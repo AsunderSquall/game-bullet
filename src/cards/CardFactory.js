@@ -7,6 +7,12 @@ import { Passive002 } from './Passive002.js';
 import { Passive003 } from './Passive003.js';
 import { Passive004 } from './Passive004.js';
 import { Passive005 } from './Passive005.js';
+import { Passive006 } from './Passive006.js';
+import { Passive008 } from './Passive008.js';
+import { GoldPassive001 } from './GoldPassive001.js';
+import { GoldPassive002 } from './GoldPassive002.js';
+import { GoldPassive006 } from './GoldPassive006.js';
+import { GoldPassive007 } from './GoldPassive007.js';
 
 const registry = {
   'weapon001': Weapon001,
@@ -17,6 +23,12 @@ const registry = {
   'passive003': Passive003,
   'passive004': Passive004,
   'passive005': Passive005,
+  'passive006': Passive006,
+  'passive008': Passive008,
+  'goldpassive001': GoldPassive001,
+  'goldpassive002': GoldPassive002,
+  'goldpassive006': GoldPassive006,
+  'goldpassive007': GoldPassive007,
 };
 
 export function createCardFromId(id) {

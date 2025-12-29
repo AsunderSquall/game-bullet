@@ -95,7 +95,7 @@ async function init() {
     const playerCur = {
       health: computed.maxHealth ?? tempGlobalData.base_maxHealth ?? 100,
       maxHealth: computed.maxHealth ?? tempGlobalData.base_maxHealth ?? 100,
-      shields: computed.shields ?? 2,
+      shields: computed.shields ?? 0,
       bombs: computed.bombs ?? tempGlobalData.base_bombs ?? 3,
       lives: computed.lives ?? tempGlobalData.base_lives ?? 2,
       power: computed.power ?? tempGlobalData.base_power ?? 250,
