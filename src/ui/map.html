@@ -1,0 +1,66 @@
+<!-- src/ui/map.html -->
+<!-- 纯片段～不含 <html><head><body>，也不 import 任何 js～全交给 MapMain.js！ -->
+
+<div id="map-container"></div>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #0f0f2e, #000011);
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif, system-ui;
+  }
+
+  #map-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .map-layer {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+  }
+
+  .map-node {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    background: #222244;
+    border: 4px solid #555;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ddd;
+    transition: all 0.3s ease;
+  }
+
+  .map-node.clickable {
+    cursor: pointer;
+    border-color: #ffdd66;
+    box-shadow: 0 0 25px rgba(255, 221, 102, 0.5);
+  }
+
+  .map-node.clickable:hover {
+    transform: scale(1.2);
+    background: #334466;
+  }
+
+  .map-node.visited {
+    background: #004422;
+    border-color: #00ffaa;
+    box-shadow: 0 0 30px rgba(0, 255, 170, 0.5);
+  }
+
+  .map-node.locked { opacity: 0.4; cursor: not-allowed; }
+
+  .node-icon { font-size: 36px; margin-bottom: 4px; }
+  .node-text { font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px black; }
+</style>

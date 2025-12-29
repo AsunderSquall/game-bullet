@@ -1,0 +1,23 @@
+{
+  "health": 100,
+  "maxHealth": 100,
+  "shields": 2,
+  "bombs": 3,
+  "lives": 2,
+  "power": 0,
+  "maxPower": 400,
+  "hitRadius": 0.6,
+  "hitOffsetY": 0.65,
+  "grazeRadius": 1.5,
+  "attackPower": 38,
+  "attackSpeed": 0.09,
+  "bulletType": "sakuya_knife_normal",
+  "position": {
+    "x": 0,
+    "y": 15,
+    "z": 0
+  },
+  "upgrades": [
+    "吸血"
+  ]
+}

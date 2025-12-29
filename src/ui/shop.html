@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>商店</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    background: #111;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  #top-info {
+    padding: 20px;
+    background: #222;
+    text-align: center;
+    font-size: 24px;
+    border-bottom: 2px solid #444;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+
+  #top-info span {
+    font-weight: bold;
+    color: #ffff66;
+    text-shadow: 0 0 10px #ffcc00;
+  }
+
+  #main-content {
+    display: flex;
+    flex: 1;
+  }
+
+  #left-shop {
+    width: 50%;
+    padding: 40px;
+    background: #1a1a1a;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  #right-inventory {
+    width: 50%;
+    padding: 40px;
+    background: #222;
+    overflow-y: auto;
+    border-left: 2px solid #444;
+  }
+
+  #shop-container,
+  #inventory-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 40px 30px;
+    justify-items: center;
+    padding: 20px 0;
+  }
+
+  /* ===== 通用卡牌样式 ===== */
+  .card {
+    width: 150px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: #333;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.7);
+    transition: transform 0.25s ease;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    transform: translateY(-12px) scale(1.08);
+  }
+
+  .card-icon {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 4px solid #66ccff;
+    box-shadow: 0 0 18px rgba(102,204,255,0.6);
+  }
+
+  .card-name {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    margin: 6px 0;
+  }
+
+  .card-price {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffff66;
+    text-shadow: 0 0 8px #ffcc00;
+    margin-top: auto;
+  }
+
+  .buy-btn {
+    margin-top: 8px;
+    background: #ffcc00;
+    color: #333;
+    font-weight: bold;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .buy-btn:hover {
+    background: #ffff33;
+    box-shadow: 0 0 15px #ffff66;
+  }
+
+  /* ===== 左下角升级区 ===== */
+  #upgrade-panel {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    display: flex;
+    gap: 25px;
+  }
+
+  #back-btn {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 40px;
+    font-size: 20px;
+    background: #66ccff;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+  }
+
+  #back-btn:hover {
+    background: #99eeff;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="top-info">
+  <div>金币： <span id="current-gold">0</span> 💰</div>
+  <div>卡槽位： <span id="current-slots">8</span></div>
+  <div>能量上限： <span id="max-energy">5</span></div>
+</div>
+
+<div id="main-content">
+  <div id="left-shop">
+    <h2 style="text-align:center; text-shadow:0 0 10px #ffcc00;">可购买卡牌</h2>
+    <div id="shop-container"></div>
+
+    <!-- 升级卡牌区 -->
+    <div id="upgrade-panel">
+
+      <!-- 卡槽升级 -->
+      <div class="card">
+        <img class="card-icon" src="../../picture/cards/Maxhosts.png" />
+        <div class="card-name">增加卡槽位</div>
+        <div class="card-price">100 💰</div>
+        <button class="buy-btn">购买</button>
+      </div>
+
+      <!-- 能量升级 -->
+      <div class="card">
+        <img class="card-icon" src="../../picture/cards/MaxEnergy.png" />
+        <div class="card-name">增加最大能量</div>
+        <div class="card-price">100 💰</div>
+        <button class="buy-btn">购买</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="right-inventory">
+    <h2 style="text-align:center; text-shadow:0 0 10px #66ffff;">已拥有卡牌库</h2>
+    <div id="inventory-container"></div>
+  </div>
+</div>
+
+<button id="back-btn">结束购买</button>
+
+</body>
+</html>

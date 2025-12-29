@@ -1,0 +1,16 @@
+{
+  "shopItems": [
+    {
+      "id": "weapon003",
+      "price": 120
+    },
+    {
+      "id": "passive004",
+      "price": 50
+    },
+    {
+      "id": "passive002",
+      "price": 50
+    }
+  ]
+}
