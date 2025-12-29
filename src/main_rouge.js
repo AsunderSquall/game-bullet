@@ -33,9 +33,8 @@ async function startNewGame() {
 
   await storage.save_global('global.json', globalData);
 
-  console.log('✅ 地图生成并保存成功！正在显示地图～');
+  console.log('✅ 地图生成并保存成功！正在显示地图');
 
-  // 直接调用 MapMain 的静态方法～它会自己加载 html 片段并渲染！
   await showMap();
 }
 
