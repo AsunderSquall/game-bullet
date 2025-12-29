@@ -2,7 +2,7 @@
 export const tempPlayerDefault = {
   health: 100,
   maxHealth: 100,
-  shields: 2,
+  shields: 0,
   bombs: 3,
   lives: 2,
   power: 0,

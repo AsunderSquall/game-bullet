@@ -23,7 +23,7 @@ export async function loadPlayerData() {
   playerData = await storage.load('playerCur.json', {
     health: 100,
     maxHealth: 100,
-    shields: 2,
+    shields: 0,
     bombs: 3,
     lives: 2,
     power: 400,
@@ -33,6 +33,9 @@ export async function loadPlayerData() {
     grazeRadius: 1.4,
     attackPower: 28,
     attackSpeed: 0.09,
+    regenerateInterval: -1.0,
+    regenTimer: 0,
+    totem: 0,
     bulletType: "sakuya_knife_normal",
     position: { x: 0, y: 15, z: 0 },
     upgrades: []
@@ -65,6 +68,7 @@ export class Player {
   }
 
   takeDamage(amount) {
+    amount -= this.data.shields;
     if (this.dead) return;
     const now = performance.now() / 1000;
     if (now < (this.invulnerableUntil || 0)) {
@@ -77,6 +81,13 @@ export class Player {
     storage.set('playerCur.json', { ...this.data, health: this.health });
 
     if (this.health <= 0) {
+      if (this.data.totem > 0) {
+        this.data.totem--;
+        this.health = this.maxHealth;
+        
+        storage.set('playerCur.json', { ...this.data, health: this.health, totem: this.data.totem });
+        return;
+      }
       this.health = 0;
       this.dead = true;
       console.log("玩家死亡");
@@ -85,6 +96,17 @@ export class Player {
   }
 
   update(delta) {
+    if (this.data.regenerateInterval > 0.0 && this.health < this.maxHealth) {
+      this.regenTimer += delta;
+      if (this.regenTimer >= this.data.regenerateInterval) {
+        this.regenTimer -= this.data.regenerateInterval;
+        this.health = Math.floor(this.health + 1.0);
+      }
+      storage.set('playerCur.json', {
+        ...this.data,
+        health: this.health,
+      });
+    }
     let speed = 1.2;
     if (keys.shift) speed *= 0.3;
 
