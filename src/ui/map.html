@@ -1,7 +1,8 @@
 <!-- src/ui/map.html -->
-<!-- 纯片段～不含 <html><head><body>，也不 import 任何 js～全交给 MapMain.js！ -->
-
-<div id="map-container"></div>
+<div id="map-container">
+  <div id="map-lines"></div>
+  <div id="map-nodes"></div>
+</div>
 
 <style>
   body {
@@ -21,10 +22,7 @@
   #map-container::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background-image: url('../../picture/background_map.png');
     background-size: cover;
     background-position: center;
@@ -33,8 +31,24 @@
     z-index: 0;
   }
 
-  #map-container svg {
+  /* ===== 关键：线层 ===== */
+  #map-lines {
+    position: absolute;
+    inset: 0;
     z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ===== 关键：节点层 ===== */
+  #map-nodes {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  #map-lines svg {
+    width: 100%;
+    height: 100%;
   }
 
   .map-layer {
@@ -44,7 +58,6 @@
     display: flex;
     justify-content: center;
     gap: 80px;
-    z-index: 2;
   }
 
   .map-node {
@@ -59,7 +72,6 @@
     justify-content: center;
     align-items: center;
     color: #ddd;
-    z-index: 3;
     transition: all 0.3s ease;
   }
 
@@ -80,7 +92,12 @@
     box-shadow: 0 0 30px rgba(0, 255, 170, 0.5);
   }
 
-  .map-node.locked { opacity: 0.4; cursor: not-allowed; }
+  .map-node.locked {
+    background: #303030;
+    border-color: #333;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+  }
 
   .node-icon { font-size: 36px; margin-bottom: 4px; }
   .node-text { font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px black; }
