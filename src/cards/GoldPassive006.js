@@ -1,9 +1,9 @@
 import { BaseCard } from './baseCard.js';
 
-export class GoldPassive005 extends BaseCard {
+export class GoldPassive006 extends BaseCard {
   constructor() {
     super({
-      id: 'goldpassive005',
+      id: 'goldpassive006',
       name: '护甲',
       description: '护甲增加50',
       type: 'passive',
