@@ -24,13 +24,44 @@ export class BasePlayerBullet {
   }
 
   createMesh() {
-    const geo = new THREE.SphereGeometry(this.size, 16, 12);
-    const mat = new THREE.MeshBasicMaterial({
+    // Create a more elongated bullet shape using octahedron geometry
+    const geometry = new THREE.OctahedronGeometry(this.size, 0);
+
+    const positions = geometry.attributes.position;
+    const vertex = new THREE.Vector3();
+
+    for (let i = 0; i < positions.count; i++) {
+      vertex.fromBufferAttribute(positions, i);
+
+      if (vertex.z > 0) {
+        vertex.z *= 8.0; // Make it much more elongated in +Z direction
+      } else {
+        vertex.z *= 2.0;
+        vertex.z -= 1.5; // Make it more elongated in -Z direction
+      }
+
+      positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
+    }
+
+    geometry.attributes.position.needsUpdate = true;
+    geometry.computeVertexNormals();
+
+    const mat = new THREE.MeshStandardMaterial({
       color: this.color,
       emissive: this.color,
-      emissiveIntensity: 0.8,
+      emissiveIntensity: 0.5,
+      metalness: 0.3,
+      roughness: 0.4,
+      side: THREE.DoubleSide,
+      depthWrite: false
     });
-    return new THREE.Mesh(geo, mat);
+
+    const mesh = new THREE.Mesh(geometry, mat);
+    mesh.lookAt(this.direction.clone().multiplyScalar(1000));
+    mesh.rotateX(Math.PI / 4);
+    mesh.rotateY(Math.PI / 4);
+
+    return mesh;
   }
 
   update(delta, enemies) {

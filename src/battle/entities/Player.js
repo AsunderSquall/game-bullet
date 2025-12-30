@@ -26,7 +26,7 @@ export async function loadPlayerData() {
     shields: 0,
     bombs: 3,
     lives: 2,
-    power: 400,
+    power: 0,
     maxPower: 400,
     hitRadius: 0.6,
     hitOffsetY: 0.6,

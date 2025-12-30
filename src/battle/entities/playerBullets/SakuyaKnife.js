@@ -23,10 +23,10 @@ createMesh() {
       vertex.fromBufferAttribute(positions, i);
       
       if (vertex.z > 0) {
-        vertex.z *= 3.2;
+        vertex.z *= 8.0; // 更加细长
       } else {
-        vertex.z *= 0.7;
-        vertex.z -= 0.4;
+        vertex.z *= 2.0;
+        vertex.z -= 1.5; // 更加细长
       }
       
       positions.setXYZ(i, vertex.x, vertex.y, vertex.z);
@@ -35,10 +35,12 @@ createMesh() {
     geometry.attributes.position.needsUpdate = true;
     geometry.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     emissive: 0xaaccff,
-    emissiveIntensity: 0.8,
+    emissiveIntensity: 0.5,
+    metalness: 0.3,
+    roughness: 0.4,
     transparent: true,
     opacity: 0.5,
     side: THREE.DoubleSide,

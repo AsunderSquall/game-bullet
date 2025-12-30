@@ -14,7 +14,8 @@ export class Weapon003 extends BaseCard {
   }
 
   apply(playerData) {
-    playerData.bulletType = 'homeing_knife';
+    playerData.power = 400;
+    playerData.bulletType = 'sakuya_knife';
     playerData.attackPower = 14;
     playerData.attackSpeed = 0.10;
   }
