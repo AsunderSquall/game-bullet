@@ -45,8 +45,8 @@ export class Battle {
     currentPlayer = this.player;
     this.scene.add(this.player.object);
 
-    // 恢复玩家满血
-    this.restorePlayerHealth();
+    // 不再自动恢复玩家满血，保留玩家当前血量状态
+    // this.restorePlayerHealth();
 
     this.camera = createCamera();
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -150,6 +150,8 @@ export class Battle {
 
   // 检查是否满足通关条件
   checkWinCondition() {
+    this.onWin();
+    return;
     // 只有在所有波次的敌人都已生成后，才检查通关条件
     if (this.allWavesSpawned) {
       // 情况1：所有敌人已被消灭

@@ -113,24 +113,33 @@ function renderConnections(mapData) {
 
 async function selectNode(node) {
   const globalData = await storage.load_global('global.json');
+  // 确保节点ID被添加到路径中（如果尚未存在）
+  if (!globalData.currentPath.includes(node.id)) {
   globalData.currentPath.push(node.id);
+  }
   await storage.save_global('global.json', globalData);
 
   alert(`即将进入 ${node.type.toUpperCase()} 房间～✨`);
 
   if (node.type === 'shop') {
     // 加载商店界面
-    import('../shop/ShopMain.js').then(({ showShop }) => {
-      // 清空当前页面内容，为商店界面做准备
-      document.body.innerHTML = '<div id="shop-container"></div>';
-      showShop();
+    import('../shop/ShopMain.js').then(module => {
+      if (module.showShop) {
+        module.showShop();
+      } else {
+        // 如果没有showShop函数，则执行默认的main函数
+        module.default && module.default();
+      }
     }).catch(err => {
       console.error('加载商店界面失败:', err);
     });
   } else if (node.type === 'rest') {
-    // 预留rest界面的接口，稍后会创建
-    console.log('进入休息房间');
-    // 这里可以预留rest界面的接口
+    // 加载休息界面
+    import('../select/RestMain.js').then(({ showRest }) => {
+      showRest();
+    }).catch(err => {
+      console.error('加载休息界面失败:', err);
+    });
   } else if (node.type === 'event') {
     // 预留event节点的接口
     console.log('进入事件房间');

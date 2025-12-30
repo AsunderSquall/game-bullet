@@ -166,7 +166,12 @@ async function init() {
       try {
         await storage.save_global('global.json', tempGlobalData);
         alert('存档已保存');
-        // location.href = 'menu.html';  // 实际项目中跳转主菜单
+        // 跳转到地图界面
+        import('../map/MapMain.js').then(({ showMap }) => {
+          showMap();
+        }).catch(err => {
+          console.error('加载地图界面失败:', err);
+        });
       } catch (err) {
         alert('保存失败');
         console.error(err);
