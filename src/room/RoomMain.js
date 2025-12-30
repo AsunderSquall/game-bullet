@@ -5,208 +5,183 @@ import { SelectMain } from '../select/SelectMain.js';
 import { showRest } from '../select/RestMain.js';
 import { EventMain } from '../event/EventMain.js';
 
+// --- 配置文件：基础数值与分类池 ---
+const ENEMY_BASE_STATS = {
+    fairy_red:    { hp: 100 * 20, dmg: 8,  speed: 10 },
+    wave_enemy:   { hp: 60 * 20,  dmg: 10, speed: 5 },
+    spiral_enemy: { hp: 120 * 5, dmg: 6,  speed: 4 },
+    fairy_blue:   { hp: 100 * 20, dmg: 10, speed: 8 },
+    circle_enemy: { hp: 80 * 20,  dmg: 12, speed: 6 },
+    tracker_enemy:{ hp: 50 * 20,  dmg: 8,  speed: 10 }
+};
+
+const POOLS = {
+    simple: ['fairy_red', 'wave_enemy', 'spiral_enemy'],
+    hard:   ['fairy_blue', 'circle_enemy', 'tracker_enemy']
+};
+
+/**
+ * 辅助函数：根据当前路径计算成长后的敌人配置
+ */
+function createScaledEnemy(id, x, z, hpGrowth, dmgGrowth, eliteMult) {
+    const base = ENEMY_BASE_STATS[id];
+    return {
+        type: id,
+        position: { x, y: 100, z },
+        hp: Math.floor(base.hp * hpGrowth * eliteMult),
+        options: {
+            damage: Math.floor(base.dmg * dmgGrowth),
+            forwardSpeed: base.speed // 基础移动速度保持稳定
+        }
+    };
+}
+
+/**
+ * 核心逻辑：生成战斗波次
+ */
+async function generateBattleWaves(type, globalData) {
+    // 统计路径中战斗房间的数量 n
+    const n = globalData.currentPath ? globalData.currentPath.filter(node => 
+        ['normal', 'elite', 'boss'].includes(node.type)
+    ).length : 0;
+
+    const hpGrowth = Math.pow(1.1, n);
+    const dmgGrowth = Math.pow(1.2, n);
+    const eliteMult = (type === 'elite') ? 1.3 : 1.0;
+
+    const waves = [];
+    const pickSimple = () => POOLS.simple[Math.floor(Math.random() * POOLS.simple.length)];
+    const pickHard = () => POOLS.hard[Math.floor(Math.random() * POOLS.hard.length)];
+
+    if (type === 'normal') {
+        // 第一波：随机 3 个简单怪
+        waves.push({
+            time: 1.0,
+            enemies: [
+                createScaledEnemy(pickSimple(), 0, 200, hpGrowth, dmgGrowth, eliteMult),
+                createScaledEnemy(pickSimple(), 0, 300, hpGrowth, dmgGrowth, eliteMult),
+                createScaledEnemy(pickSimple(), 0, 400, hpGrowth, dmgGrowth, eliteMult)
+            ]
+        });
+        // 第二波：随机 1 个困难怪
+        waves.push({
+            time: 15.0,
+            enemies: [
+                createScaledEnemy(pickHard(), 0, 400, hpGrowth, dmgGrowth, eliteMult)
+            ]
+        });
+    } else if (type === 'elite') {
+        // 第一波：1 困难 + 2 简单
+        waves.push({
+            time: 1.0,
+            enemies: [
+                createScaledEnemy(pickHard(), 0, 300, hpGrowth, dmgGrowth, eliteMult),
+                createScaledEnemy(pickSimple(), 0, 200, hpGrowth, dmgGrowth, eliteMult),
+                createScaledEnemy(pickSimple(), 0, 400, hpGrowth, dmgGrowth, eliteMult)
+            ]
+        });
+        // 第二波：2 困难
+        waves.push({
+            time: 20.0,
+            enemies: [
+                createScaledEnemy(pickHard(), -50, 400, hpGrowth, dmgGrowth, eliteMult),
+                createScaledEnemy(pickHard(), 50, 400, hpGrowth, dmgGrowth, eliteMult)
+            ]
+        });
+    }
+    return waves;
+}
+
+// --- 主入口函数 ---
 export async function enterRoom(type) {
-  const globalData = await storage.load_global('global.json');
+    const globalData = await storage.load_global('global.json');
+    let roomData = {};
 
-  let roomData = {};
+    switch (type) {
+        case 'normal':
+        case 'elite':
+            roomData = {
+                name: type === 'normal' ? "普通关卡" : "精英关卡",
+                background: type === 'normal' ? "0x000022" : "0x110011",
+                waves: await generateBattleWaves(type, globalData),
+                rewards: { cards: 3, gold: type === 'normal' ? 100 : 250 },
+                type: type
+            };
+            break;
 
-  switch (type) {
-    case 'normal':
-      roomData = {
-      name: "普通关卡",
-      background: "0x000022",
-      waves: [
-        {
-          time: 1.0,
-          enemies: [
-            {
-              type: "fairy_blue",
-              position: { x: 0, y: 100, z: 200 },
-              hp: 4000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            }
-          ]
-        },
-        {
-          time: 15.0,
-          enemies: [
-            {
-              type: "fairy_red",
-              position: { x: 0, y: 50, z: 300 },
-              hp: 3000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            },
-            {
-              type: "fairy_red",
-              position: { x: 0, y: 100, z: 300 },
-              hp: 3000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            },
-            {
-              type: "fairy_red",
-              position: { x: 0, y: 150, z: 300 },
-              hp: 3000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            }
-          ]
+        case 'event': {
+            const eventNames = ['slime_pit', 'beggar_elder', 'cursed_chest', 'forbidden_armory', 'drunken_veteran', 'fairy_gift'];
+            roomData = { name: eventNames[Math.floor(Math.random() * eventNames.length)] };
+            break;
         }
-      ],
-      rewards: { cards: 3, gold: 100 },
-      type: 'normal',
-    };
-      break;
-    
-    case 'elite':
-      roomData = {
-      name: "精英关卡",
-      background: "0x000022",
-      waves: [
-        {
-          time: 1.0,
-          enemies: [
-            {
-              type: "fairy_blue",
-              position: { x: 0, y: 100, z: 200 },
-              hp: 6000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            }
-          ]
-        },
-        {
-          time: 15.0,
-          enemies: [
-            {
-              type: "fairy_red",
-              position: { x: 0, y: 50, z: 300 },
-              hp: 6000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            },
-            {
-              type: "fairy_red",
-              position: { x: 0, y: 100, z: 300 },
-              hp: 6000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            },
-            {
-              type: "fairy_red",
-              position: { x: 0, y: 150, z: 300 },
-              hp: 6000,
-              options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
-            }
-          ]
+
+        case 'shop': {
+            // 1. 武器抽卡 (1个)
+            const isWeapon03 = Math.random() < 0.9;
+            const firstWeapon = {
+                id: isWeapon03 ? "weapon003" : "weapon002",
+                price: isWeapon03 ? Math.floor(Math.random() * 21) + 120 : Math.floor(Math.random() * 21) + 230
+            };
+
+            // 2. 被动抽卡 (3个)
+            const getRandomPassive = () => ({
+                id: `passive00${Math.floor(Math.random() * 8) + 1}`,
+                price: Math.floor(Math.random() * 21) + 60
+            });
+
+            const getBasePrice = () => Math.floor(Math.random() * 21) + 90;
+
+            roomData = {
+                name: "商店",
+                background: "0x112233",
+                shopItems: [
+                    firstWeapon,
+                    getRandomPassive(),
+                    getRandomPassive(),
+                    getRandomPassive() // 改为 3 个被动
+                ],
+                EnergyPrice: getBasePrice(),
+                PostsPrice: getBasePrice(),
+                BombPrice: getBasePrice()
+            };
+            break;
         }
-      ],
-      rewards: { cards: 3, gold: 100 },
-      type: 'elite'
-    };
-      break;
 
-    case 'event': {
-      const eventNames = [
-        'slime_pit', 
-        'beggar_elder', 
-        'cursed_chest', 
-        'forbidden_armory', 
-        'drunken_veteran', 
-        'fairy_gift'
-      ];
+        case 'rest':
+            roomData = {
+                name: "休息点",
+                background: "0x113311",
+                restOptions: ["heal"],
+                rewards: { healAmount: 100 }
+            };
+            break;
 
-      const randomName = eventNames[Math.floor(Math.random() * eventNames.length)];
+        case 'boss':
+            // 可以在此处定义 Boss 逻辑
+            roomData = { name: "最终Boss", background: "0x330000", waves: [] };
+            break;
 
-      roomData = {
-        name: randomName,
-      };
-      break;
+        default:
+            roomData = { name: "未知房间", waves: [] };
     }
 
-    case 'shop': {
-      // 1. 处理第一张牌的概率和价格
-      const isWeapon03 = Math.random() < 0.9;
-      const firstWeapon = {
-        id: isWeapon03 ? "weapon003" : "weapon002",
-        price: isWeapon03 
-          ? Math.floor(Math.random() * (140 - 120 + 1)) + 120  // 120~140
-          : Math.floor(Math.random() * (250 - 230 + 1)) + 230  // 230~250
-      };
+    // --- 数据保存与路由跳转 ---
+    globalData.currentStatus = type;
 
-      // 2. 处理后两张被动牌 (Passive01~08)
-      const getRandomPassive = () => {
-        const idNum = Math.floor(Math.random() * 8) + 1; // 1~8
-        return {
-          id: `passive00${idNum}`,
-          price: Math.floor(Math.random() * (80 - 60 + 1)) + 60 // 60~80
-        };
-      };
-
-      // 3. 生成基础物品价格 (90~110)
-      const getBasePrice = () => Math.floor(Math.random() * (110 - 90 + 1)) + 90;
-
-      roomData = {
-        name: "商店",
-        background: "0x112233",
-        shopItems: [
-          firstWeapon,
-          getRandomPassive(),
-          getRandomPassive()
-        ],
-        EnergyPrice: getBasePrice(),
-        PostsPrice: getBasePrice(),
-        BombPrice: getBasePrice()
-      };
-
-      await storage.save('shopCur.json', roomData);
-      break;
+    if (['normal', 'elite', 'boss'].includes(type)) {
+        globalData.currentStatus = 'select';
+        await storage.save('battleCur.json', roomData);
+        await storage.save_global('global.json', globalData);
+        await SelectMain();
+    } else if (type === 'shop') {
+        await storage.save('shopCur.json', roomData);
+        await ShopMain();
+    } else if (type === 'rest') {
+        await showRest();
+    } else if (type === 'event') {
+        await storage.save('eventCur.json', roomData);
+        await EventMain();
+    } else {
+        alert(`进入${roomData.name}～功能开发中喵！`);
     }
-
-    case 'rest':
-      roomData = {
-        name: "休息点",
-        background: "0x113311",
-        restOptions: ["heal"],
-        rewards: { healAmount: 100 }
-      };
-      break;
-
-    case 'boss':
-      roomData = {
-        name: "Boss",
-        background: "0x330000",
-        waves: [ /* 以后放大Boss */ ]
-      };
-      break;
-
-    default:
-      roomData = { name: "未知房间", waves: [] };
-  }
-  
-  
-
-  globalData.currentStatus = type;
-
-  switch (type) {
-    case 'normal':
-    case 'elite':
-    case 'boss':
-      globalData.currentStatus = 'select';
-      
-      await storage.save('battleCur.json',roomData)
-      await storage.save_global('global.json', globalData);
-      await SelectMain();
-      break;
-    case 'shop':
-      await storage.save('shopCur.json',roomData)
-      await ShopMain();
-      break;
-    case 'rest':
-      await showRest();
-      break;
-    case 'event':
-      await storage.save('eventCur.json',roomData)
-      console.log("event start");
-      await EventMain();
-      break;
-    default:
-      alert(`进入${roomData.name}～功能开发中喵！`);
-      break;
-  }
 }

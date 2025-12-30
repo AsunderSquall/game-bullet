@@ -108,9 +108,9 @@ async function init() {
 
       attackPower: computed.attackPower ?? 28,
       attackSpeed: computed.attackSpeed ?? 0.09,
-      bulletType: currentWeaponCard?.bulletType || "sakuya_knife_normal",
+      bulletType: currentWeaponCard?.name || "sakuya_knife_normal",
 
-      position: { x: 0, y: 15, z: 0 },
+      position: { x: 0, y: 250, z: 0 },
 
       upgrades: computed.upgrades || []  // 临时升级不漏！
     };

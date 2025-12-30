@@ -5,6 +5,7 @@ export class Weapon002 extends BaseCard {
     super({
       id: 'weapon002',
       name: '追踪飞刀',
+      bulletType: 'homeing_knife',
       description: '子弹会在一定程度上自动追踪最近的敌人',
       type: 'weapon',
       energy: 2,

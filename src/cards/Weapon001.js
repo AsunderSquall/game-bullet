@@ -5,7 +5,7 @@ export class Weapon001 extends BaseCard {
     super({
       id: 'weapon001',
       name: '普通飞刀',
-      bulletType: '',
+      bulletType: 'normal_knife',
       description: '高速直线飞刀，射速快、伤害稳定',
       type: 'weapon',
       energy: 1,

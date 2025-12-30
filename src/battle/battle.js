@@ -494,7 +494,7 @@ async showVictoryScreen() {
     // 更新被动槽位和能量上限
     if (extraSlotsAdded > 0) globalData.max_passive_slots = (globalData.max_passive_slots || 0) + extraSlotsAdded;
     if (extraEnergyAdded > 0) globalData.max_energy = (globalData.max_energy || 0) + extraEnergyAdded;
-    global.bomb += extraBomb;
+    globalData.bomb += extraBomb;
 
     // 更新卡牌库
     if (!globalData.deck) globalData.deck = {};
