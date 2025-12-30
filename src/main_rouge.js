@@ -55,12 +55,12 @@ async function startNewGame() {
   let globalData = {
     money: 100,
     health: 100,
-    bomb: 0,
+    bomb: 1,
     currentPath: [],
     deck: {
       weapon001: 1,
       passive001: 1,
-      passive001: 1,
+      passive002: 1,
     },
     max_passive_slots: 2,
     max_energy: 3

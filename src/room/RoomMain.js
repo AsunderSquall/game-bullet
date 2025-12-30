@@ -119,7 +119,7 @@ export async function enterRoom(type) {
       break;
     }
 
-case 'shop': {
+    case 'shop': {
       // 1. 处理第一张牌的概率和价格
       const isWeapon03 = Math.random() < 0.9;
       const firstWeapon = {

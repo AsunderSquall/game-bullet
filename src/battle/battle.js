@@ -444,12 +444,12 @@ async showVictoryScreen() {
     console.log("显示结算画面");
     this.gameRunning = false;
 
-    // --- 1. 获取基础奖励数据 ---
-    // 假设你在 start 时将 battleData 存到了 this.currentBattleData
+    // --- 1. 获取基础数据 ---
     const battleData = await storage.load('battleCur.json');
     const baseRewards = battleData.rewards || { gold: 0, cards: 0 };
+    const isElite = battleData.type === "elite"; // 判断是否为精英战斗
 
-    // --- 2. 计算最终奖励 ---
+    // --- 2. 计算基础倍率与奖励 ---
     const killRate = this.totalEnemiesCount > 0 ? (this.killedEnemiesCount / this.totalEnemiesCount) : 1.0;
     const multiplier = Math.pow(killRate, 1.5);
     
@@ -460,111 +460,95 @@ async showVictoryScreen() {
     const pool = ['passive001', 'passive002', 'passive003', 'passive004', 'passive005', 'passive006', 'passive007', 'passive008'];
     const rewardedCards = [];
     for (let i = 0; i < finalCardsCount; i++) {
-      const randomId = pool[Math.floor(Math.random() * pool.length)];
-      const card = createCardFromId(randomId);
-      if (card) rewardedCards.push(card);
+        const randomId = pool[Math.floor(Math.random() * pool.length)];
+        const card = createCardFromId(randomId);
+        if (card) rewardedCards.push(card);
     }
 
-    // --- 3. UI 基础设置 (保持你原有的部分) ---
+    // --- 3. 精英怪额外奖励逻辑 (独立概率判断) ---
+    let extraRewardsInfo = [];
+    let extraSlotsAdded = 0;
+    let extraEnergyAdded = 0;
+    let extraBomb = 0;
+
+    if (isElite) {
+        // 独立判定：倍率越接近 1，获得概率越高
+        if (Math.random() < multiplier * 0.67) {
+            extraSlotsAdded = 1;
+            extraRewardsInfo.push(`<div style="color: #ff00ff;">💎 被动槽位上限 + ${extraSlotsAdded}</div>`);
+        }
+        if (Math.random() < multiplier * 0.67) {
+            extraEnergyAdded = 1;
+            extraRewardsInfo.push(`<div style="color: #00ff00;">🔋 能量上限 + ${extraEnergyAdded}</div>`);
+        }
+        if (Math.random() < multiplier * 0.67) {
+            extraBomb = 1;
+            extraRewardsInfo.push(`<div style="color: #00ff00;">💣 符卡数量+ ${extraBomb}</div>`);
+        }
+    }
+
+    // --- 4. 数据存入 global.json ---
+    const globalData = await storage.load_global('global.json');
+    globalData.money = (globalData.money || 0) + finalGold;
+    
+    // 更新被动槽位和能量上限
+    if (extraSlotsAdded > 0) globalData.max_passive_slots = (globalData.max_passive_slots || 0) + extraSlotsAdded;
+    if (extraEnergyAdded > 0) globalData.max_energy = (globalData.max_energy || 0) + extraEnergyAdded;
+    global.bomb += extraBomb;
+
+    // 更新卡牌库
+    if (!globalData.deck) globalData.deck = {};
+    rewardedCards.forEach(card => {
+        globalData.deck[card.id] = (globalData.deck[card.id] || 0) + 1;
+    });
+
+    await storage.save_global('global.json', globalData);
+
+    // --- 5. UI 构建 (包含额外奖励展示) ---
     const fontLink = document.createElement('link');
     fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap';
     fontLink.rel = 'stylesheet';
     document.head.appendChild(fontLink);
 
     const overlay = document.createElement('div');
-    overlay.style.cssText = `
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle, rgba(0, 40, 80, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      z-index: 1000; pointer-events: auto; font-family: 'Orbitron', sans-serif;
-    `;
+    overlay.style.cssText = `position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 40, 80, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; pointer-events: auto; font-family: 'Orbitron', sans-serif;`;
 
     const container = document.createElement('div');
-    container.style.cssText = `
-      text-align: center; padding: 50px 80px;
-      background: rgba(0, 20, 40, 0.8);
-      border-radius: 15px; border: 2px solid #00d4ff;
-      box-shadow: 0 0 50px rgba(0, 212, 255, 0.5), inset 0 0 30px rgba(0, 212, 255, 0.2);
-      transform: scale(0.8); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    `;
+    container.style.cssText = `text-align: center; padding: 50px 80px; background: rgba(0, 20, 40, 0.8); border-radius: 15px; border: 2px solid ${isElite ? '#ff00ff' : '#00d4ff'}; box-shadow: 0 0 50px rgba(0, 212, 255, 0.5); transform: scale(0.8); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);`;
 
     const title = document.createElement('div');
-    title.textContent = '战斗胜利！';
-    title.style.cssText = `font-size: 56px; font-weight: bold; color: #fff; margin-bottom: 10px; text-shadow: 0 0 20px #00d4ff; letter-spacing: 5px;`;
+    title.textContent = isElite ? '✦ 精英战胜利 ✦' : '战斗胜利！';
+    title.style.cssText = `font-size: 56px; font-weight: bold; color: #fff; margin-bottom: 10px; text-shadow: 0 0 20px ${isElite ? '#ff00ff' : '#00d4ff'}; letter-spacing: 5px;`;
 
     const subtitle = document.createElement('div');
     subtitle.textContent = `击杀了 ${this.killedEnemiesCount} / ${this.totalEnemiesCount} 敌人 (${(killRate * 100).toFixed(0)}%)`;
     subtitle.style.cssText = `font-size: 18px; color: #00d4ff; margin-bottom: 40px; opacity: 0.8;`;
 
-    // --- 4. 动态生成奖励 DOM ---
     const rewardContainer = document.createElement('div');
-    rewardContainer.id = 'victory-rewards';
-    rewardContainer.style.cssText = `
-      margin: 20px 0; padding: 20px; min-width: 400px;
-      background: rgba(255, 255, 255, 0.05); border-top: 1px solid rgba(0, 212, 255, 0.3);
-      border-bottom: 1px solid rgba(0, 212, 255, 0.3);
-    `;
+    rewardContainer.style.cssText = `margin: 20px 0; padding: 20px; min-width: 400px; background: rgba(255, 255, 255, 0.05); border-top: 1px solid rgba(0, 212, 255, 0.3); border-bottom: 1px solid rgba(0, 212, 255, 0.3);`;
 
     let cardsHTML = rewardedCards.map(card => {
-      const info = card.getDisplayInfo();
-      return `
-        <div style="width: 100px; background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; border-radius: 5px; padding: 5px; font-size: 10px;">
-          <div style="color: #ffd700; font-size: 8px;">⚡ ${card.energy}</div>
-          <img src="${info.icon}" style="width: 40px; height: 40px; margin: 5px 0;">
-          <div style="color: #fff; font-weight: bold; overflow: hidden; white-space: nowrap;">${info.name}</div>
-          <div style="color: #aaa; font-size: 8px; height: 24px; overflow: hidden;">${info.description}</div>
-        </div>
-      `;
+        const info = card.getDisplayInfo();
+        return `<div style="width: 100px; background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; border-radius: 5px; padding: 5px; font-size: 10px;"><div style="color: #ffd700; font-size: 8px;">⚡ ${card.energy}</div><img src="${info.icon}" style="width: 40px; height: 40px; margin: 5px 0;"><div style="color: #fff; font-weight: bold; overflow: hidden; white-space: nowrap;">${info.name}</div><div style="color: #aaa; font-size: 8px; height: 24px; overflow: hidden;">${info.description}</div></div>`;
     }).join('');
 
     rewardContainer.innerHTML = `
-      <div style="color: #aaa; font-size: 14px; margin-bottom: 15px;">获得奖励 (倍率 x${multiplier.toFixed(2)})</div>
-      <div style="color: #ffd700; font-size: 24px; font-weight: bold; margin-bottom: 20px;">💰 + ${finalGold}</div>
-      <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-        ${cardsHTML || '<span style="color: #666;">无卡牌奖励</span>'}
-      </div>
+        <div style="color: #aaa; font-size: 14px; margin-bottom: 10px;">获得奖励 (倍率 x${multiplier.toFixed(2)})</div>
+        <div style="color: #ffd700; font-size: 24px; font-weight: bold; margin-bottom: 15px;">💰 + ${finalGold}</div>
+        ${extraRewardsInfo.length > 0 ? `<div style="margin-bottom: 20px; font-size: 16px; font-weight: bold;">${extraRewardsInfo.join('')}</div>` : ''}
+        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            ${cardsHTML || '<span style="color: #666;">无卡牌奖励</span>'}
+        </div>
     `;
 
-    // --- 5. 数据存入 global.json ---
-    const globalData = await storage.load_global('global.json');
-    globalData.money = (globalData.money || 0) + finalGold;
-    if (!globalData.deck) globalData.deck = {};
-
-    rewardedCards.forEach(card => {
-      const cardId = card.id;
-      if (globalData.deck[cardId] !== undefined) {
-        globalData.deck[cardId] += 1;
-      } else {
-        globalData.deck[cardId] = 1;
-      }
-    });
-    await storage.save_global('global.json', globalData);
-
-    // --- 6. 确认按钮 (保持你原有的逻辑) ---
+    // --- 6. 确认按钮逻辑 ---
     const confirmButton = document.createElement('button');
     confirmButton.textContent = '确认并继续';
-    confirmButton.style.cssText = `
-      margin-top: 40px; padding: 15px 60px; font-size: 20px; font-family: 'Orbitron';
-      background: transparent; color: #00d4ff; border: 2px solid #00d4ff;
-      border-radius: 5px; cursor: pointer; transition: all 0.3s ease;
-      text-transform: uppercase; overflow: hidden; position: relative;
-    `;
+    confirmButton.style.cssText = `margin-top: 40px; padding: 15px 60px; font-size: 20px; font-family: 'Orbitron'; background: transparent; color: #00d4ff; border: 2px solid #00d4ff; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase;`;
 
-    confirmButton.onmouseover = () => {
-      confirmButton.style.background = '#00d4ff';
-      confirmButton.style.color = '#000';
-      confirmButton.style.boxShadow = '0 0 30px #00d4ff';
-    };
-    confirmButton.onmouseout = () => {
-      confirmButton.style.background = 'transparent';
-      confirmButton.style.color = '#00d4ff';
-      confirmButton.style.boxShadow = 'none';
-    };
-
-    confirmButton.onclick = () => {
-      document.body.removeChild(overlay);
-      this.goToMapScreen();
-    };
+    confirmButton.onmouseover = () => { confirmButton.style.background = '#00d4ff'; confirmButton.style.color = '#000'; };
+    confirmButton.onmouseout = () => { confirmButton.style.background = 'transparent'; confirmButton.style.color = '#00d4ff'; };
+    confirmButton.onclick = () => { document.body.removeChild(overlay); this.goToMapScreen(); };
 
     container.appendChild(title);
     container.appendChild(subtitle);
@@ -574,13 +558,12 @@ async showVictoryScreen() {
     document.body.appendChild(overlay);
 
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        container.style.opacity = '1';
-        container.style.transform = 'scale(1)';
-      }, 100);
+        setTimeout(() => {
+            container.style.opacity = '1';
+            container.style.transform = 'scale(1)';
+        }, 100);
     });
-  }
-
+}
   async goToMapScreen() {
     console.log("跳转到地图界面");
 
