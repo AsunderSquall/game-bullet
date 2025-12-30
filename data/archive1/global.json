@@ -1,6 +1,6 @@
 {
   "money": 25,
-  "health": 89,
+  "health": 0,
   "bomb": 1,
   "currentPath": [
     "0-2",
@@ -522,5 +522,6 @@
   "currentStatus": "battle",
   "PostsPrice": 100,
   "EnergyPrice": 100,
-  "BombPrice": 100
+  "BombPrice": 100,
+  "isPlayerDead": true
 }
