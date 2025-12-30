@@ -28,6 +28,9 @@ export class Battle {
     this.currentWaveIndex = 0;
 
     this.lastShootTime = 0;
+
+    // 添加通关相关属性
+    this.allWavesSpawned = false; // 标记是否已生成所有波次的敌人
   }
 
   async start(battleFile = 'battleCur.json') {
@@ -82,6 +85,11 @@ export class Battle {
     while (this.currentWaveIndex < this.waves.length && this.time >= this.waves[this.currentWaveIndex].time) {
       this.spawnWave(this.waves[this.currentWaveIndex++]);
     }
+
+    // 检查是否已生成所有波次的敌人
+    if (this.currentWaveIndex >= this.waves.length && !this.allWavesSpawned) {
+      this.allWavesSpawned = true;
+    }
   }
 
   spawnWave(wave) {
@@ -102,6 +110,9 @@ export class Battle {
       if (!e.dead) e.update?.(delta, this.time);
       return !e.dead;
     });
+
+    // 检查是否通关
+    this.checkWinCondition();
   }
 
   updateEnemyBullets(delta) {
@@ -121,6 +132,34 @@ export class Battle {
       if (b.markedForDeletion) {
         this.playerBullets.splice(i,1);
       }
+    }
+  }
+
+  // 检查是否满足通关条件
+  checkWinCondition() {
+    // 只有在所有波次的敌人都已生成后，才检查通关条件
+    if (this.allWavesSpawned && this.enemies.length === 0) {
+      // 所有敌人已被消灭，判定通关
+      this.onWin();
+    }
+  }
+
+  // 通关时调用的函数
+  onWin() {
+    console.log("恭喜通关！");
+    // 调用结算画面接口
+    this.showVictoryScreen();
+  }
+
+  // 预留的结算画面接口
+  showVictoryScreen() {
+    // 这里是预留的接口，你可以在这里实现结算画面逻辑
+    console.log("显示结算画面");
+
+    // 可以在这里添加实际的结算画面逻辑
+    // 例如：显示胜利界面、统计得分、保存游戏进度等
+    if (window.showBattleResult) {
+      window.showBattleResult('victory');
     }
   }
 
