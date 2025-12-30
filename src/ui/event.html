@@ -1,0 +1,51 @@
+<!-- src/ui/Event.html -->
+<div id="event-container" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85) center/cover no-repeat;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family: 'Microsoft YaHei', sans-serif;
+  font-size: 24px;
+  z-index: 1000;
+  pointer-events: auto;
+">
+  <div id="event-description" style="
+    max-width: 800px;
+    padding: 30px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 15px;
+    text-align: center;
+    line-height: 1.8;
+    margin-bottom: 40px;
+    white-space: pre-wrap;
+  "></div>
+
+  <div id="event-choices" style="
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    width: 90%;
+  "></div>
+</div>
+
+<style>
+  .event-choice-btn {
+    padding: 18px 30px;
+    font-size: 22px;
+    background: rgba(255,100,100,0.8);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .event-choice-btn:hover {
+    background: rgba(255,150,150,0.9);
+    transform: scale(1.05);
+  }
+</style>
