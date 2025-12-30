@@ -57,9 +57,12 @@ async function renderMap() {
         <div class="node-text">${node.type.toUpperCase()}</div>
       `;
 
-      if (currentPath.includes(node.id)) nodeDiv.classList.add('visited');
-
-      if (isNodeReachable(node, currentPath, mapData)) {
+      if (currentPath.includes(node.id)) {
+        nodeDiv.classList.add('visited');
+        // 如果节点已被访问，即使它技术上不可达，也不应显示为locked
+        // 检查是否是当前层的第一个节点，如果是且未被访问过前序节点，则可能需要特殊处理
+        // 但通常已访问的节点不应再被标记为locked
+      } else if (isNodeReachable(node, currentPath, mapData)) {
         nodeDiv.classList.add('clickable');
         nodeDiv.onclick = () => selectNode(node);
       } else {

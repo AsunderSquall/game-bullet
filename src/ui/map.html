@@ -75,10 +75,23 @@
     transition: all 0.3s ease;
   }
 
+  .map-node.visited {
+    background: #004422;
+    border-color: #00ffaa;
+    box-shadow: 0 0 30px rgba(0, 255, 170, 0.5);
+  }
+
   .map-node.clickable {
     cursor: pointer;
     border-color: #ffdd66;
     box-shadow: 0 0 25px rgba(255, 221, 102, 0.5);
+  }
+
+  .map-node.visited.clickable {
+    /* 当节点既是已访问又是可点击时，优先显示已访问的样式 */
+    background: #004422;
+    border-color: #00ffaa;
+    box-shadow: 0 0 30px rgba(0, 255, 170, 0.5);
   }
 
   .map-node.clickable:hover {
@@ -86,17 +99,19 @@
     background: #334466;
   }
 
-  .map-node.visited {
-    background: #004422;
-    border-color: #00ffaa;
-    box-shadow: 0 0 30px rgba(0, 255, 170, 0.5);
-  }
-
   .map-node.locked {
     background: #303030;
     border-color: #333;
     cursor: not-allowed;
     filter: grayscale(100%);
+  }
+
+  .map-node.visited.locked {
+    /* 当节点既是已访问又是锁定状态时，优先显示已访问的样式 */
+    background: #004422;
+    border-color: #00ffaa;
+    filter: none; /* 移除灰度效果 */
+    cursor: default; /* 恢复默认光标 */
   }
 
   .node-icon { font-size: 36px; margin-bottom: 4px; }
