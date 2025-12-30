@@ -61,6 +61,38 @@ export class Player {
     this.hitOffset = new THREE.Vector3(0, data.hitOffsetY, 0);
     global_hitOffset = this.hitOffset;
     this.dead = false;
+
+    // 预加载子弹类
+    this.sakuyaKnifeClass = null;
+    this.homingKnifeClass = null;
+    this.loadBulletClasses();
+  }
+
+  async loadBulletClasses() {
+    const { SakuyaKnife } = await import('./playerBullets/SakuyaKnife.js');
+    this.sakuyaKnifeClass = SakuyaKnife;
+
+    const { HomingKnife } = await import('./playerBullets/HomingKnife.js');
+    this.homingKnifeClass = HomingKnife;
+  }
+
+  createBullet(position, direction, damage) {
+    // 根据子弹类型创建不同的子弹
+    let BulletClass;
+    if (this.data.bulletType === 'homeing_knife') {
+      BulletClass = this.homingKnifeClass || this.sakuyaKnifeClass;
+    } else {
+      BulletClass = this.sakuyaKnifeClass;
+    }
+
+    if (BulletClass) {
+      if (this.data.bulletType === 'homeing_knife') {
+        return new BulletClass(this.object.parent, position, direction, { damage: damage }, this.enemies);
+      } else {
+        return new BulletClass(this.object.parent, position, direction, { damage: damage });
+      }
+    }
+    return null;
   }
 
   getHitPosition() {
@@ -170,35 +202,35 @@ export class Player {
 
         const forward0 = new THREE.Vector3(0, 0, 1);
         const spawnPos0 = this.getHitPosition().clone().add(forward0.clone().multiplyScalar(2));
-        const bullet0 = new SakuyaKnife(this.object.parent,spawnPos0,forward0,{ damage: this.data.attackPower });
-        this.playerBullets.push(bullet0);
-        if (this.data.power>=100) 
+        const bullet0 = this.createBullet(spawnPos0, forward0, this.data.attackPower);
+        if (bullet0) this.playerBullets.push(bullet0);
+        if (this.data.power>=100)
         {
           const forward1 = new THREE.Vector3(0, 0.05, 1);
           const spawnPos1 = this.getHitPosition().clone().add(forward1.clone().multiplyScalar(2));
-          const bullet1 = new SakuyaKnife(this.object.parent,spawnPos1,forward1,{ damage: this.data.attackPower });
-          this.playerBullets.push(bullet1);
+          const bullet1 = this.createBullet(spawnPos1, forward1, this.data.attackPower);
+          if (bullet1) this.playerBullets.push(bullet1);
         }
-        if (this.data.power>=200) 
+        if (this.data.power>=200)
         {
           const forward1 = new THREE.Vector3(0, -0.05, 1);
           const spawnPos1 = this.getHitPosition().clone().add(forward1.clone().multiplyScalar(2));
-          const bullet1 = new SakuyaKnife(this.object.parent,spawnPos1,forward1,{ damage: this.data.attackPower });
-          this.playerBullets.push(bullet1);
+          const bullet1 = this.createBullet(spawnPos1, forward1, this.data.attackPower);
+          if (bullet1) this.playerBullets.push(bullet1);
         }
-        if (this.data.power>=300) 
+        if (this.data.power>=300)
         {
           const forward1 = new THREE.Vector3(0.05, 0, 1);
           const spawnPos1 = this.getHitPosition().clone().add(forward1.clone().multiplyScalar(2));
-          const bullet1 = new SakuyaKnife(this.object.parent,spawnPos1,forward1,{ damage: this.data.attackPower });
-          this.playerBullets.push(bullet1);
+          const bullet1 = this.createBullet(spawnPos1, forward1, this.data.attackPower);
+          if (bullet1) this.playerBullets.push(bullet1);
         }
-        if (this.data.power>=400) 
+        if (this.data.power>=400)
         {
           const forward1 = new THREE.Vector3(-0.05, 0, 1);
           const spawnPos1 = this.getHitPosition().clone().add(forward1.clone().multiplyScalar(2));
-          const bullet1 = new SakuyaKnife(this.object.parent,spawnPos1,forward1,{ damage: this.data.attackPower });
-          this.playerBullets.push(bullet1);
+          const bullet1 = this.createBullet(spawnPos1, forward1, this.data.attackPower);
+          if (bullet1) this.playerBullets.push(bullet1);
         }
     }
   }

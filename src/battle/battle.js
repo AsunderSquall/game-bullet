@@ -7,6 +7,7 @@ import { createPlayer, setupControls } from './entities/Player.js';
 import { EnemyFactory } from './entities/EnemyFactory.js';
 import { storage } from '../utils/storage.js';
 import { updateHUD } from '../ui/hud.js';
+import { RandomBattleGenerator } from './utils/randomBattleGenerator.js';
 
 let currentPlayer = null;
 
@@ -57,11 +58,17 @@ export class Battle {
 
     setupControls(this.renderer.domElement);
 
-    const battleData = await storage.load(battleFile, {
-      name: "测试关卡",
-      background: 0x000011,
-      waves: []
-    });
+    // 检查是否需要生成随机关卡
+    let battleData;
+    if (battleFile === 'random') {
+      battleData = RandomBattleGenerator.generateRandomBattle();
+    } else {
+      battleData = await storage.load(battleFile, {
+        name: "测试关卡",
+        background: 0x000011,
+        waves: []
+      });
+    }
 
     this.waves = battleData.waves || [];
     this.scene.background = new THREE.Color(battleData.background);
@@ -433,6 +440,15 @@ export class Battle {
     // 确保玩家数据已保存
     if (this.player && this.player.data) {
       await storage.save('playerCur.json', this.player.data);
+    }
+
+    // 如果当前节点ID存在，将其添加到全局路径中（只有在胜利时才添加）
+    if (this.currentNodeId) {
+      const globalData = await storage.load_global('global.json');
+      if (!globalData.currentPath.includes(this.currentNodeId)) {
+        globalData.currentPath.push(this.currentNodeId);
+        await storage.save_global('global.json', globalData);
+      }
     }
 
     // 清理当前战斗场景
