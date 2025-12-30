@@ -16,7 +16,7 @@ let maxEnergy = 5;
 // DOM
 let weaponSlot, passiveSlots, deckContainer, display, confirmBtn;
 
-async function main() {
+export async function SelectMain() {
   try {
     const response = await fetch('src/ui/SelectMain.html');
     if (!response.ok) throw new Error('加载失败');
@@ -283,5 +283,3 @@ function updateAllDeckCounts() {
     if (protoCard.updateCount) protoCard.updateCount();
   });
 }
-
-main();

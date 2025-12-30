@@ -47,7 +47,7 @@ async function startNewGame() {
 
   const newMap = createMap(8);
 
-  let globalData = await storage.load_global('global.json') || {
+  let globalData = {
     money: 100,
     health: 100,
     bomb: 0,

@@ -1,12 +1,12 @@
 {
-  "health": 76,
+  "health": 100,
   "maxHealth": 100,
   "shields": 0,
   "bombs": 3,
   "lives": 2,
   "power": 0,
   "maxPower": 400,
-  "hitRadius": 0.6,
+  "hitRadius": 0.65,
   "hitOffsetY": 0.65,
   "grazeRadius": 1.5,
   "attackPower": 38,
@@ -17,7 +17,5 @@
     "y": 15,
     "z": 0
   },
-  "upgrades": [
-    "吸血"
-  ]
+  "upgrades": []
 }
