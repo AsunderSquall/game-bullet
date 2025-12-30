@@ -2,6 +2,8 @@
 import { storage } from './utils/storage.js';
 import { createMap } from './map/CreateMap.js';
 import { showMap } from './map/MapMain.js';
+import { SelectMain } from './select/SelectMain.js';
+import { ShopMain } from './shop/ShopMain.js';
 
 console.log('✨ 猫娘来啦～欢迎主人进入弹幕冒险世界！');
 
@@ -74,7 +76,11 @@ async function startNewGame() {
 async function continueGame() {
   console.log('加载存档中！');
   document.body.innerHTML = '';
-  await showMap();
+  const globalData = await storage.load_global('global.json');
+  if (globalData.currentStatus = 'select') await SelectMain();
+  if (globalData.currentStatus = 'shop') await ShopMain();
+  if (globalData.currentStatus = 'map') await showMap();
+  if (globalData.currentStatus = 'battle') await showMap();
 }
 
 function openSettings() {

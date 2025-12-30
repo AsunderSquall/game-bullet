@@ -135,15 +135,16 @@ export async function enterRoom(type) {
       roomData = { name: "未知房间", waves: [] };
   }
   
-  await storage.save_global('global.json', globalData);
+  
 
   globalData.currentStatus = type;
 
-  // ⭐ 再调用对应界面
   switch (type) {
     case 'normal':
     case 'elite':
     case 'boss':
+      globalData.currentStatus = 'select';
+      await storage.save_global('global.json', globalData);
       await SelectMain();
       break;
     case 'shop':

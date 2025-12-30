@@ -9,8 +9,8 @@
   "hitRadius": 0.65,
   "hitOffsetY": 0.65,
   "grazeRadius": 1.5,
-  "attackPower": 38,
-  "attackSpeed": 0.09,
+  "attackPower": 0,
+  "attackSpeed": 0,
   "bulletType": "sakuya_knife_normal",
   "position": {
     "x": 0,
