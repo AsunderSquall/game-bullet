@@ -1,9 +1,17 @@
 import { FairyRed } from './enemies/FairyRed.js';
 import { FairyBlue } from './enemies/FairyBlue.js';
+import { CircleEnemy } from './enemies/CircleEnemy.js';
+import { WaveEnemy } from './enemies/WaveEnemy.js';
+import { TrackerEnemy } from './enemies/TrackerEnemy.js';
+import { SpiralEnemy } from './enemies/SpiralEnemy.js';
 
 const registry = {
   'fairy_red': FairyRed,
   'fairy_blue': FairyBlue,
+  'circle_enemy': CircleEnemy,
+  'wave_enemy': WaveEnemy,
+  'tracker_enemy': TrackerEnemy,
+  'spiral_enemy': SpiralEnemy,
 };
 
 export class EnemyFactory {

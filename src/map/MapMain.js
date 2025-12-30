@@ -237,7 +237,7 @@ async function selectNode(node) {
       const game = new Battle();
       // 传递节点ID给战斗场景，以便战斗结束后可以保存
       game.currentNodeId = node.id;
-      game.start('battleCur.json');
+      game.start('random'); // 使用随机生成的关卡
     }).catch(err => {
       console.error('加载战斗场景失败:', err);
     });
