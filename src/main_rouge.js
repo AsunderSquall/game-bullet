@@ -1,42 +1,91 @@
-// src/main.js
-// 超简洁入口～生成地图 → 保存 → 调用 MapMain 自己显示界面
 
-import { createMap } from './map/CreateMap.js';
 import { storage } from './utils/storage.js';
+import { createMap } from './map/CreateMap.js';
 import { showMap } from './map/MapMain.js';
 
-async function startNewGame() {
-  console.log('✨ 开始新游戏！生成专属地图～');
+console.log('✨ 猫娘来啦～欢迎主人进入弹幕冒险世界！');
 
-  const newMap = createMap(6);
+let btnStart, btnContinue, btnSettings, messageDiv;
 
-  let globalData = await storage.load_global('global.json');
-
-  if (!globalData) {
-    globalData = {
-      money: 0,
-      health: 100,
-      bomb: 5,
-      currentPath: [],
-      deck: {
-        weapon001: 1,
-        weapon002: 1,
-        passive001: 1
-      },
-      max_passive_slots: 3,
-      max_energy: 4
-    };
+async function main() {
+  try {
+    const response = await fetch('src/ui/start.html');
+    if (!response.ok) throw new Error(`加载失败：${response.status}`);
+    document.body.innerHTML = await response.text();
+  } catch (err) {
+    console.error('开始界面加载失败', err);
+    document.body.innerHTML = '<h1 style="color:red;text-align:center;margin-top:100px;">加载失败</h1>';
+    return;
   }
+
+  btnStart = document.getElementById('btn-start');
+  btnContinue = document.getElementById('btn-continue');
+  btnSettings = document.getElementById('btn-settings');
+  messageDiv = document.getElementById('message');
+
+  if (!btnStart || !btnSettings) {
+    console.error('开始界面元素没找到！');
+    return;
+  }
+
+  await init();
+}
+
+async function init() {
+  const globalData = await storage.load_global('global.json');
+  if (globalData && globalData.map) {
+    btnContinue.style.display = 'block';
+  }
+
+  btnStart.onclick = startNewGame;
+  btnContinue.onclick = continueGame;
+  btnSettings.onclick = openSettings;
+}
+
+async function startNewGame() {
+  console.log('✨ 生成专属地图！');
+
+  const newMap = createMap(8);
+
+  let globalData = await storage.load_global('global.json') || {
+    money: 100,
+    health: 100,
+    bomb: 0,
+    currentPath: [],
+    deck: {
+      weapon001: 1,
+      passive001: 1,
+      passive001: 1,
+    },
+    max_passive_slots: 2,
+    max_energy: 3
+  };
 
   globalData.map = newMap;
   globalData.currentPath = [];
 
   await storage.save_global('global.json', globalData);
 
-  console.log('✅ 地图生成并保存成功！正在显示地图');
-
+  console.log('✅ 地图生成成功！');
+  document.body.innerHTML = '';
   await showMap();
 }
 
-// 自动启动
-document.addEventListener('DOMContentLoaded', startNewGame);
+async function continueGame() {
+  console.log('加载存档中！');
+  document.body.innerHTML = '';
+  await showMap();
+}
+
+function openSettings() {
+  showMessage('设定功能还在开发中！', 3000);
+}
+
+function showMessage(text, duration = 2500) {
+  messageDiv.textContent = text;
+  messageDiv.style.opacity = '1';
+  setTimeout(() => messageDiv.style.opacity = '0', duration);
+}
+
+// 启动！
+main();

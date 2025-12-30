@@ -1,0 +1,62 @@
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #000;
+    color: #fff;
+  }
+  #start-screen {
+    width: 100%;
+    height: 100%;
+    background-image: url('/picture/background_map.png');  /* 背景图放 public/picture/ 最稳 */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+  }
+  .btn {
+    width: 280px;
+    padding: 25px 0;
+    font-size: 34px;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(40, 40, 100, 0.8);
+    border: 5px solid #aaf;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    user-select: none;
+    box-shadow: 0 0 25px rgba(170, 170, 255, 0.7);
+  }
+  .btn:hover {
+    background: rgba(120, 120, 200, 0.95);
+    transform: scale(1.15);
+    box-shadow: 0 0 50px #aaf;
+  }
+  #btn-continue {
+    display: none;
+  }
+  #message {
+    position: fixed;
+    bottom: 70px;
+    font-size: 26px;
+    color: #ffff99;
+    text-shadow: 0 0 15px #000;
+    opacity: 0;
+    transition: opacity 0.8s;
+  }
+</style>
+
+<div id="start-screen">
+  <div class="btn" id="btn-continue">继续游戏</div>
+  <div class="btn" id="btn-start">开始游戏</div>
+  <div class="btn" id="btn-settings">设定</div>
+</div>
+<div id="message"></div>
