@@ -1,161 +1,69 @@
 {
-  "name": "新敌人演示关卡",
-  "background": "0x220022",
+  "name": "测试关卡",
+  "background": "0x000022",
   "waves": [
     {
-      "time": 2.0,
+      "time": 1,
       "enemies": [
         {
-          "type": "circle_enemy",
+          "type": "fairy_blue",
           "position": {
-            "x": -20,
+            "x": 0,
             "y": 100,
             "z": 200
           },
-          "hp": 80,
+          "hp": 6000,
           "options": {
-            "circleRadius": 15,
-            "circleSpeed": 2,
-            "shootInterval": 1.5,
-            "bulletSpeed": 15,
-            "bulletCount": 8
-          }
-        },
-        {
-          "type": "wave_enemy",
-          "position": {
-            "x": 20,
-            "y": 120,
-            "z": 200
-          },
-          "hp": 60,
-          "options": {
-            "waveAmplitude": 10,
-            "waveFrequency": 2.5,
-            "forwardSpeed": 5,
-            "shootInterval": 2.0,
-            "bulletSpeed": 18,
-            "bulletCount": 10
+            "shootInterval": 3,
+            "bulletCount": 24,
+            "bulletSpeed": 20
           }
         }
       ]
     },
     {
-      "time": 8.0,
+      "time": 15,
       "enemies": [
         {
-          "type": "tracker_enemy",
+          "type": "fairy_red",
           "position": {
             "x": 0,
-            "y": 80,
+            "y": 50,
             "z": 300
           },
-          "hp": 50,
+          "hp": 6000,
           "options": {
-            "trackingSpeed": 3,
-            "shootInterval": 2.0,
-            "bulletSpeed": 25,
-            "bulletCount": 1,
-            "isRotating": false
+            "shootInterval": 3,
+            "bulletCount": 24,
+            "bulletSpeed": 20
           }
-        }
-      ]
-    },
-    {
-      "time": 12.0,
-      "enemies": [
+        },
         {
-          "type": "spiral_enemy",
+          "type": "fairy_red",
           "position": {
             "x": 0,
             "y": 100,
-            "z": 400
+            "z": 300
           },
-          "hp": 120,
+          "hp": 6000,
           "options": {
-            "spiralRadius": 12,
-            "spiralSpeed": 1.5,
-            "forwardSpeed": 4,
-            "shootInterval": 1.0,
-            "bulletSpeed": 6,
-            "bulletCount": 15
-          }
-        }
-      ]
-    },
-    {
-      "time": 18.0,
-      "enemies": [
-        {
-          "type": "tracker_enemy",
-          "position": {
-            "x": -15,
-            "y": 70,
-            "z": 500
-          },
-          "hp": 50,
-          "options": {
-            "trackingSpeed": 3,
-            "shootInterval": 1.5,
-            "bulletSpeed": 20,
-            "bulletCount": 1,
-            "isRotating": true,
-            "rotationSpeed": 1.2
+            "shootInterval": 3,
+            "bulletCount": 24,
+            "bulletSpeed": 20
           }
         },
         {
-          "type": "circle_enemy",
+          "type": "fairy_red",
           "position": {
-            "x": 15,
-            "y": 130,
-            "z": 500
+            "x": 0,
+            "y": 150,
+            "z": 300
           },
-          "hp": 80,
+          "hp": 6000,
           "options": {
-            "circleRadius": 12,
-            "circleSpeed": 2.5,
-            "shootInterval": 1.2,
-            "bulletSpeed": 12,
-            "bulletCount": 6
-          }
-        }
-      ]
-    },
-    {
-      "time": 25.0,
-      "enemies": [
-        {
-          "type": "wave_enemy",
-          "position": {
-            "x": -25,
-            "y": 110,
-            "z": 600
-          },
-          "hp": 60,
-          "options": {
-            "waveAmplitude": 15,
-            "waveFrequency": 3.5,
-            "forwardSpeed": 4.5,
-            "shootInterval": 1.8,
-            "bulletSpeed": 15,
-            "bulletCount": 12
-          }
-        },
-        {
-          "type": "spiral_enemy",
-          "position": {
-            "x": 25,
-            "y": 90,
-            "z": 600
-          },
-          "hp": 120,
-          "options": {
-            "spiralRadius": 10,
-            "spiralSpeed": 2.0,
-            "forwardSpeed": 3.5,
-            "shootInterval": 1.2,
-            "bulletSpeed": 8,
-            "bulletCount": 18
+            "shootInterval": 3,
+            "bulletCount": 24,
+            "bulletSpeed": 20
           }
         }
       ]
