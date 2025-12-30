@@ -12,14 +12,14 @@ export class HomingKnife extends BasePlayerBullet {
       ...options
     });
 
-    this.enemies = enemies; // 敌人列表
-    this.target = null; // 当前追踪的目标
-    this.searchRadius = 550; // 搜索半径
-    this.findNearestEnemy(); // 寻找最近的敌人
+    this.enemies = enemies;
+    this.target = null;
+    this.searchRadius = 50; 
+    this.findNearestEnemy(); 
+    this.velocity = new THREE.Vector3(0, 0, this.speed);
 
-    // 添加最大存活时间（20秒）
     this.creationTime = Date.now();
-    this.maxLifetime = 20000; // 20秒 = 20000毫秒
+    this.maxLifetime = 20000;
   }
 
   createMesh() {
@@ -68,35 +68,68 @@ export class HomingKnife extends BasePlayerBullet {
   update(delta, enemies, globalTime) {
     if (this.markedForDeletion) return;
 
-    // 检查是否超过最大存活时间
     if (Date.now() - this.creationTime > this.maxLifetime) {
       this.markedForDeletion = true;
       this.destroy();
       return;
     }
 
-    // 更新追踪目标
     this.updateTarget(enemies);
 
-    // 更新位置 - 保持恒定的Z速度
-    this.mesh.position.z += this.speed * delta;
-
-    // 在XY平面内追踪目标（只有当目标存在且未死亡时）
-    if (this.target && this.target.mesh && !this.target.dead) {
-      this.updateXYMovementToTarget(this.target.mesh.position, delta);
+    if (!this.velocity) {
+      this.velocity = new THREE.Vector3(0, 0, this.speed);
     }
 
-    // 检查与敌人的碰撞
+    if (this.target && this.target.mesh && !this.target.dead) {
+      const toTarget = new THREE.Vector3()
+        .subVectors(this.target.mesh.position, this.mesh.position)
+        .normalize();
+
+      const maxTurnAnglePerFrame = 0.5 * Math.PI / 180;  // 0.8° ≈ 0.014 弧度
+
+      // 计算当前方向到目标方向的角度差
+      const angleDiff = this.velocity.clone().normalize().angleTo(toTarget);
+
+      let turnRatio = 1;
+      if (angleDiff > maxTurnAnglePerFrame) {
+        turnRatio = maxTurnAnglePerFrame / angleDiff;  // 只转一部分
+      }
+
+      const currentDir = this.velocity.clone().normalize();
+      const targetQuat = new THREE.Quaternion().setFromUnitVectors(currentDir, toTarget);
+      const slerpQuat = new THREE.Quaternion().slerp(targetQuat, turnRatio);
+
+      // 应用转向到 velocity
+      this.velocity.applyQuaternion(slerpQuat);
+    }
+
+    // —— 保持整体速度恒定！ ——
+    this.velocity.setLength(this.speed);  // 强制长度 = 40
+
+    // —— 更新位置 ——
+    this.mesh.position.add(this.velocity.clone().multiplyScalar(delta));
+
+    // —— mesh 永远面向速度方向（丝滑不突兀） ——
+    if (this.velocity.length() > 0.01) {
+      const lookTarget = this.mesh.position.clone().add(this.velocity.clone().normalize().multiplyScalar(50));
+      this.mesh.lookAt(lookTarget);
+
+      // 可选：加一点 slerp 让旋转更柔和（防微抖）
+      // const targetQuat = new THREE.Quaternion().setFromRotationMatrix(
+      //   new THREE.Matrix4().lookAt(this.mesh.position, lookTarget, new THREE.Vector3(0,1,0))
+      // );
+      // this.mesh.quaternion.slerp(targetQuat, 0.3);
+    }
+
+    // 碰撞、飞过目标、边界（不变）
     this.checkCollision(enemies);
 
-    // 检查是否超过目标（在Z轴方向）
     if (this.hasPassedTarget()) {
       this.markedForDeletion = true;
       this.destroy();
       return;
     }
 
-    // 检查边界
     this.checkBounds();
   }
 
