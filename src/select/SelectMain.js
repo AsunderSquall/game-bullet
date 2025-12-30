@@ -16,7 +16,7 @@ let maxEnergy = 5;
 // DOM
 let weaponSlot, passiveSlots, deckContainer, display, confirmBtn;
 
-async function main() {
+export async function SelectMain() {
   try {
     const response = await fetch('src/ui/SelectMain.html');
     if (!response.ok) throw new Error('加载失败');
@@ -121,6 +121,7 @@ async function init() {
       currentPassiveCards.forEach(card => {
         tempGlobalData.deck[card.id] = (tempGlobalData.deck[card.id] || 0) - 1;
       });
+      tempGlobalData.currentStatus = 'battle';
 
       await storage.save_global('global.json', tempGlobalData);
 
@@ -276,12 +277,9 @@ function recalculateParams() {
   display.upgrades.textContent = computed.upgrades?.length > 0 ? computed.upgrades.join(', ') : '无';
 }
 
-// 其余函数不变～你的原代码超完美！
 
 function updateAllDeckCounts() {
   document.querySelectorAll('.card').forEach(protoCard => {
     if (protoCard.updateCount) protoCard.updateCount();
   });
 }
-
-main();

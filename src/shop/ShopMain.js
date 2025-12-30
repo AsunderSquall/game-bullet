@@ -9,12 +9,11 @@ let currentBomb = 0;  // 新增：符卡数量
 
 let deckInventory = {};  // { id: count }
 
-// 临时全局数据对象（内存中操作，离开时一次性保存）
 let tempGlobalData = null;
 
 let shopContainer, inventoryContainer, display;
 
-async function main() {
+export async function ShopMain() {
   const response = await fetch('src/ui/shop.html');
   if (!response.ok) throw new Error('加载商店HTML失败～');
   document.body.innerHTML = await response.text();
@@ -250,5 +249,3 @@ function updateTopInfo() {
   display.maxEnergy.textContent = maxEnergy;
   display.bomb.textContent = currentBomb;
 }
-
-main();
