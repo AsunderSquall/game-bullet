@@ -24,7 +24,11 @@ export class Enemy {
     if (this.dead) return false;
     this.hp -= damage;
     this.onHit?.();
-    if (this.hp <= 0) this.die();
+    if (this.hp <= 0)
+    {  
+      this.kill_by_player = true;
+      this.die();
+    }
     return true;
   }
 

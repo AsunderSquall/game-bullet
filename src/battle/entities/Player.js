@@ -1,11 +1,11 @@
 // ==========================
-// Player.js（重构版）
+// Player.js（重构版 + 符卡系统）
 // ==========================
 import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { storage } from '../../utils/storage.js';
-import { SakuyaKnife } from './playerBullets/SakuyaKnife.js';
+import { currentPlayer } from '../battle.js'
 
 export const keys = { w: false, a: false, s: false, d: false, shift: false };
 export let scrollSpeed = 0;
@@ -44,14 +44,24 @@ export async function loadPlayerData() {
 }
 
 export class Player {
-  constructor(group, hitSphere, data, enemies, playerBullets) {
+  constructor(group, hitSphere, data, enemies, playerBullets, enemyBullets) {
     this.enemies = enemies;
     this.playerBullets = playerBullets;
+    this.enemyBullets = enemyBullets;  // 用于符卡清弹
+
     this.object = group;
     this.hitSphere = hitSphere;
     this.data = data;
     this.shootTimer = 0;
     this.lastShooting = false;
+
+    // 符卡变量
+    this.spellCardActive = false;
+    this.spellCardTimer = 0;
+    this.spellCardCooldown = 0;
+    this.spellCardSphere = null;
+    this.spellCardMaxRadius = 200;
+    this.spellCardDuration = 2.0;
 
     this.health = data.health;
     this.maxHealth = data.maxHealth;
@@ -77,7 +87,6 @@ export class Player {
   }
 
   createBullet(position, direction, damage) {
-    // 根据子弹类型创建不同的子弹
     let BulletClass;
     if (this.data.bulletType === 'homeing_knife') {
       BulletClass = this.homingKnifeClass || this.sakuyaKnifeClass;
@@ -99,12 +108,41 @@ export class Player {
     return this.object.position.clone().add(this.hitOffset);
   }
 
+  // 符卡发动
+  activateSpellCard() {
+    if (this.dead || this.spellCardActive || this.spellCardCooldown > 0 || this.data.bombs <= 0) {
+      return false;
+    }
+
+    this.data.bombs -= 1;
+    storage.set('playerCur.json', { ...this.data, bombs: this.data.bombs });
+
+    this.spellCardActive = true;
+    this.spellCardTimer = 0;
+    this.spellCardCooldown = 8;
+
+    const geometry = new THREE.SphereGeometry(1, 32, 24);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xcc99ff,
+      transparent: true,
+      opacity: 0.28,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    this.spellCardSphere = new THREE.Mesh(geometry, material);
+    this.spellCardSphere.position.copy(this.getHitPosition());
+    this.object.parent.add(this.spellCardSphere);
+
+    console.log("✨ 符卡发动！完美结界展开～");
+    return true;
+  }
+
   takeDamage(amount) {
     amount -= this.data.shields;
     if (this.dead) return;
     const now = performance.now() / 1000;
     if (now < (this.invulnerableUntil || 0)) {
-      
       console.log("take damage,无敌");
       return;
     }
@@ -116,7 +154,6 @@ export class Player {
       if (this.data.totem > 0) {
         this.data.totem--;
         this.health = this.maxHealth;
-        
         storage.set('playerCur.json', { ...this.data, health: this.health, totem: this.data.totem });
         return;
       }
@@ -128,6 +165,39 @@ export class Player {
   }
 
   update(delta) {
+    if (this.spellCardCooldown > 0) {
+      this.spellCardCooldown -= delta;
+      if (this.spellCardCooldown < 0) this.spellCardCooldown = 0;
+    }
+
+    if (this.spellCardActive) {
+      this.spellCardTimer += delta;
+      const progress = Math.min(1, this.spellCardTimer / this.spellCardDuration);
+      const radius = this.spellCardMaxRadius * progress;
+
+      this.spellCardSphere.scale.set(radius, radius, radius);
+      this.spellCardSphere.position.copy(this.getHitPosition());
+
+      for (let i = this.enemyBullets.length - 1; i >= 0; i--) {
+        const b = this.enemyBullets[i];
+        if (!b.mesh) continue;
+        const dist = b.mesh.position.distanceTo(this.spellCardSphere.position);
+        if (dist < radius + (b.size || 1)) {
+          b.destroy();
+          this.enemyBullets.splice(i, 1);
+        }
+      }
+
+      if (progress >= 1) {
+        this.spellCardActive = false;
+        this.object.parent.remove(this.spellCardSphere);
+        this.spellCardSphere.geometry.dispose();
+        this.spellCardSphere.material.dispose();
+        this.spellCardSphere = null;
+      }
+    }
+
+    // 原有逻辑完全不变
     if (this.data.regenerateInterval > 0.0 && this.health < this.maxHealth) {
       this.regenTimer += delta;
       if (this.regenTimer >= this.data.regenerateInterval) {
@@ -163,7 +233,6 @@ export class Player {
     p.x = THREE.MathUtils.clamp(p.x, -499, 499);
     p.y = THREE.MathUtils.clamp(p.y, 1, 499);
     p.z = THREE.MathUtils.clamp(p.z, -499, 499);
-
 
     const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
     if (now < (this.invulnerableUntil || 0)) {
@@ -236,7 +305,7 @@ export class Player {
   }
 }
 
-export async function createPlayer(enemies, playerBullets) {
+export async function createPlayer(enemies, playerBullets, enemyBullets) {
   const data = await loadPlayerData();
 
   const group = new THREE.Group();
@@ -297,7 +366,7 @@ export async function createPlayer(enemies, playerBullets) {
 
   group.position.copy(new THREE.Vector3(data.position.x, data.position.y, data.position.z));
 
-  return new Player(group, hitSphere, data, enemies, playerBullets);
+  return new Player(group, hitSphere, data, enemies, playerBullets, enemyBullets);
 }
 
 export function setupControls(rendererDom) {
@@ -321,6 +390,9 @@ export function setupControls(rendererDom) {
     if (k in keys) keys[k] = true;
     if (k === 'r' && !e.repeat) firstPerson = !firstPerson;
     if (k === 'z' && !e.repeat) shooting = !shooting;
+    if (k === 'b' && !e.repeat) {
+      currentPlayer?.activateSpellCard();  // 使用 battle.js 里的全局 currentPlayer
+    }
   });
 
   document.addEventListener('keyup', (e) => {

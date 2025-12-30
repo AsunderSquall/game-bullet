@@ -8,6 +8,7 @@ import { Passive003 } from './Passive003.js';
 import { Passive004 } from './Passive004.js';
 import { Passive005 } from './Passive005.js';
 import { Passive006 } from './Passive006.js';
+import { Passive007 } from './Passive007.js';
 import { Passive008 } from './Passive008.js';
 import { GoldPassive001 } from './GoldPassive001.js';
 import { GoldPassive002 } from './GoldPassive002.js';
@@ -24,6 +25,7 @@ const registry = {
   'passive004': Passive004,
   'passive005': Passive005,
   'passive006': Passive006,
+  'passive007': Passive007,
   'passive008': Passive008,
   'goldpassive001': GoldPassive001,
   'goldpassive002': GoldPassive002,
@@ -37,5 +39,5 @@ export function createCardFromId(id) {
     console.warn(`未知卡牌 ID: ${id}，已忽略`);
     return null;
   }
-  return new CardClass(); // 直接 new 一个新实例
+  return new CardClass();
 }

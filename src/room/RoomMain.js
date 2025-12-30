@@ -13,7 +13,7 @@ export async function enterRoom(type) {
   switch (type) {
     case 'normal':
       roomData = {
-      name: "测试关卡",
+      name: "普通关卡",
       background: "0x000022",
       waves: [
         {
@@ -22,7 +22,7 @@ export async function enterRoom(type) {
             {
               type: "fairy_blue",
               position: { x: 0, y: 100, z: 200 },
-              hp: 6000,
+              hp: 4000,
               options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
             }
           ]
@@ -33,31 +33,32 @@ export async function enterRoom(type) {
             {
               type: "fairy_red",
               position: { x: 0, y: 50, z: 300 },
-              hp: 6000,
+              hp: 3000,
               options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
             },
             {
               type: "fairy_red",
               position: { x: 0, y: 100, z: 300 },
-              hp: 6000,
+              hp: 3000,
               options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
             },
             {
               type: "fairy_red",
               position: { x: 0, y: 150, z: 300 },
-              hp: 6000,
+              hp: 3000,
               options: { shootInterval: 3, bulletCount: 24, bulletSpeed: 20 }
             }
           ]
         }
       ],
-      rewards: { cards: 3, gold: 100 }  // 猫娘随便加个奖励，主人可以改～
+      rewards: { cards: 3, gold: 100 },
+      type: 'normal',
     };
       break;
     
     case 'elite':
       roomData = {
-      name: "测试关卡",
+      name: "精英关卡",
       background: "0x000022",
       waves: [
         {
@@ -95,31 +96,67 @@ export async function enterRoom(type) {
           ]
         }
       ],
-      rewards: { cards: 3, gold: 100 }
+      rewards: { cards: 3, gold: 100 },
+      type: 'elite'
     };
       break;
 
-    case 'event':
+    case 'event': {
+      const eventNames = [
+        'slime_pit', 
+        'beggar_elder', 
+        'cursed_chest', 
+        'forbidden_armory', 
+        'drunken_veteran', 
+        'fairy_gift'
+      ];
+
+      const randomName = eventNames[Math.floor(Math.random() * eventNames.length)];
+
       roomData = {
-        name: "slime_pit",
+        name: randomName,
       };
       break;
+    }
 
-    case 'shop':
+case 'shop': {
+      // 1. 处理第一张牌的概率和价格
+      const isWeapon03 = Math.random() < 0.9;
+      const firstWeapon = {
+        id: isWeapon03 ? "weapon003" : "weapon002",
+        price: isWeapon03 
+          ? Math.floor(Math.random() * (140 - 120 + 1)) + 120  // 120~140
+          : Math.floor(Math.random() * (250 - 230 + 1)) + 230  // 230~250
+      };
+
+      // 2. 处理后两张被动牌 (Passive01~08)
+      const getRandomPassive = () => {
+        const idNum = Math.floor(Math.random() * 8) + 1; // 1~8
+        return {
+          id: `passive00${idNum}`,
+          price: Math.floor(Math.random() * (80 - 60 + 1)) + 60 // 60~80
+        };
+      };
+
+      // 3. 生成基础物品价格 (90~110)
+      const getBasePrice = () => Math.floor(Math.random() * (110 - 90 + 1)) + 90;
+
       roomData = {
-      name: "商店",
-      background: "0x112233",
-      shopItems: [
-        { id: "weapon003", price: 120 },
-        { id: "passive004", price: 50 },
-        { id: "passive002", price: 50 }
-      ],
-      EnergyPrice: 100,
-      PostsPrice: 100,
-      BombPrice: 100
-    };
-    await storage.save('shopCur.json',roomData)
+        name: "商店",
+        background: "0x112233",
+        shopItems: [
+          firstWeapon,
+          getRandomPassive(),
+          getRandomPassive()
+        ],
+        EnergyPrice: getBasePrice(),
+        PostsPrice: getBasePrice(),
+        BombPrice: getBasePrice()
+      };
+
+      await storage.save('shopCur.json', roomData);
       break;
+    }
 
     case 'rest':
       roomData = {

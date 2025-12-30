@@ -23,7 +23,7 @@ export function createMap(layers = 8, minNodes = 3, maxNodes = 6) {
 
       // 第 0 层：全部普通战斗
       if (layer === 0) {
-        type = 'event';
+        type = 'normal';
       }
       // 倒数第二层：全部休息
       else if (layer === layers - 1) {

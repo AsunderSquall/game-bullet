@@ -1,5 +1,5 @@
 {
-  "name": "测试关卡",
+  "name": "普通关卡",
   "background": "0x000022",
   "waves": [
     {
@@ -12,7 +12,7 @@
             "y": 100,
             "z": 200
           },
-          "hp": 6000,
+          "hp": 4000,
           "options": {
             "shootInterval": 3,
             "bulletCount": 24,
@@ -31,7 +31,7 @@
             "y": 50,
             "z": 300
           },
-          "hp": 6000,
+          "hp": 3000,
           "options": {
             "shootInterval": 3,
             "bulletCount": 24,
@@ -45,7 +45,7 @@
             "y": 100,
             "z": 300
           },
-          "hp": 6000,
+          "hp": 3000,
           "options": {
             "shootInterval": 3,
             "bulletCount": 24,
@@ -59,7 +59,7 @@
             "y": 150,
             "z": 300
           },
-          "hp": 6000,
+          "hp": 3000,
           "options": {
             "shootInterval": 3,
             "bulletCount": 24,
@@ -72,5 +72,6 @@
   "rewards": {
     "cards": 3,
     "gold": 100
-  }
+  },
+  "type": "normal"
 }

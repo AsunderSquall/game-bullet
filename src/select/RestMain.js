@@ -12,7 +12,7 @@ export async function showRest() {
   document.body.innerHTML = await response.text();
 
   // 加载玩家当前数据
-  const playerData = await storage.load_global('playerCur.json');
+  const playerData = await storage.load_global('global.json');
   currentHealth = playerData.health || 60;
   maxHealth = playerData.max_health || 100;
 

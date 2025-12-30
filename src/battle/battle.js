@@ -8,9 +8,9 @@ import { EnemyFactory } from './entities/EnemyFactory.js';
 import { storage } from '../utils/storage.js';
 import { updateHUD } from '../ui/hud.js';
 import { RandomBattleGenerator } from './utils/randomBattleGenerator.js';
+import { createCardFromId } from '../cards/CardFactory.js';
 
-let currentPlayer = null;
-
+export let currentPlayer = null;
 
 export class Battle {
   constructor() {
@@ -19,6 +19,8 @@ export class Battle {
     this.renderer = null;
     this.player = null;
     this.clock = new THREE.Clock();
+    this.totalEnemiesCount = 0;
+    this.killedEnemiesCount = 0;
 
     this.enemies = [];
     this.enemyBullets = [];
@@ -42,7 +44,8 @@ export class Battle {
     console.log('启动');
 
     this.scene = createScene();
-    this.player = await createPlayer(this.enemies, this.playerBullets);
+    // ★ 关键修改：多传 this.enemyBullets 给 createPlayer
+    this.player = await createPlayer(this.enemies, this.playerBullets, this.enemyBullets);
     currentPlayer = this.player;
     this.scene.add(this.player.object);
 
@@ -131,17 +134,27 @@ export class Battle {
         this.enemyBullets,
         def
       );
-      if (enemy) this.enemies.push(enemy);
+      if (enemy) this.enemies.push(enemy),this.totalEnemiesCount++;
+
     });
   }
 
   updateEnemies(delta) {
     this.enemies = this.enemies.filter(e => {
-      if (!e.dead) e.update?.(delta, this.time);
-      return !e.dead;
+      if (!e.dead) {
+        e.update?.(delta, this.time);
+        return true;
+      } else {
+        if (e.kill_by_player && !e._countedAsKilled) {
+          this.killedEnemiesCount++;
+          e._countedAsKilled = true;
+          console.log(`击杀确认！当前击杀数: ${this.killedEnemiesCount}`);
+        }
+        
+        return false;
+      }
     });
 
-    // 检查是否通关
     this.checkWinCondition();
   }
 
@@ -188,7 +201,6 @@ export class Battle {
   // 通关时调用的函数
   onWin() {
     console.log("恭喜通关！");
-    // 调用结算画面接口
     this.showVictoryScreen();
   }
 
@@ -428,24 +440,153 @@ export class Battle {
   }
 
   // 预留的结算画面接口
-  showVictoryScreen() {
-    // 这里是预留的接口，你可以在这里实现结算画面逻辑
+async showVictoryScreen() {
     console.log("显示结算画面");
+    this.gameRunning = false;
 
-    // 胜利后跳转到地图界面
-    this.goToMapScreen();
+    // --- 1. 获取基础奖励数据 ---
+    // 假设你在 start 时将 battleData 存到了 this.currentBattleData
+    const battleData = await storage.load('battleCur.json');
+    const baseRewards = battleData.rewards || { gold: 0, cards: 0 };
+
+    // --- 2. 计算最终奖励 ---
+    const killRate = this.totalEnemiesCount > 0 ? (this.killedEnemiesCount / this.totalEnemiesCount) : 1.0;
+    const multiplier = Math.pow(killRate, 1.5);
+    
+    const finalGold = Math.floor(multiplier * baseRewards.gold);
+    const finalCardsCount = Math.floor(multiplier * baseRewards.cards);
+
+    // 抽取卡牌逻辑
+    const pool = ['passive001', 'passive002', 'passive003', 'passive004', 'passive005', 'passive006', 'passive007', 'passive008'];
+    const rewardedCards = [];
+    for (let i = 0; i < finalCardsCount; i++) {
+      const randomId = pool[Math.floor(Math.random() * pool.length)];
+      const card = createCardFromId(randomId);
+      if (card) rewardedCards.push(card);
+    }
+
+    // --- 3. UI 基础设置 (保持你原有的部分) ---
+    const fontLink = document.createElement('link');
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap';
+    fontLink.rel = 'stylesheet';
+    document.head.appendChild(fontLink);
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, rgba(0, 40, 80, 0.7) 0%, rgba(0, 0, 0, 0.9) 100%);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      z-index: 1000; pointer-events: auto; font-family: 'Orbitron', sans-serif;
+    `;
+
+    const container = document.createElement('div');
+    container.style.cssText = `
+      text-align: center; padding: 50px 80px;
+      background: rgba(0, 20, 40, 0.8);
+      border-radius: 15px; border: 2px solid #00d4ff;
+      box-shadow: 0 0 50px rgba(0, 212, 255, 0.5), inset 0 0 30px rgba(0, 212, 255, 0.2);
+      transform: scale(0.8); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    `;
+
+    const title = document.createElement('div');
+    title.textContent = '战斗胜利！';
+    title.style.cssText = `font-size: 56px; font-weight: bold; color: #fff; margin-bottom: 10px; text-shadow: 0 0 20px #00d4ff; letter-spacing: 5px;`;
+
+    const subtitle = document.createElement('div');
+    subtitle.textContent = `击杀了 ${this.killedEnemiesCount} / ${this.totalEnemiesCount} 敌人 (${(killRate * 100).toFixed(0)}%)`;
+    subtitle.style.cssText = `font-size: 18px; color: #00d4ff; margin-bottom: 40px; opacity: 0.8;`;
+
+    // --- 4. 动态生成奖励 DOM ---
+    const rewardContainer = document.createElement('div');
+    rewardContainer.id = 'victory-rewards';
+    rewardContainer.style.cssText = `
+      margin: 20px 0; padding: 20px; min-width: 400px;
+      background: rgba(255, 255, 255, 0.05); border-top: 1px solid rgba(0, 212, 255, 0.3);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+    `;
+
+    let cardsHTML = rewardedCards.map(card => {
+      const info = card.getDisplayInfo();
+      return `
+        <div style="width: 100px; background: rgba(0,0,0,0.5); border: 1px solid #00d4ff; border-radius: 5px; padding: 5px; font-size: 10px;">
+          <div style="color: #ffd700; font-size: 8px;">⚡ ${card.energy}</div>
+          <img src="${info.icon}" style="width: 40px; height: 40px; margin: 5px 0;">
+          <div style="color: #fff; font-weight: bold; overflow: hidden; white-space: nowrap;">${info.name}</div>
+          <div style="color: #aaa; font-size: 8px; height: 24px; overflow: hidden;">${info.description}</div>
+        </div>
+      `;
+    }).join('');
+
+    rewardContainer.innerHTML = `
+      <div style="color: #aaa; font-size: 14px; margin-bottom: 15px;">获得奖励 (倍率 x${multiplier.toFixed(2)})</div>
+      <div style="color: #ffd700; font-size: 24px; font-weight: bold; margin-bottom: 20px;">💰 + ${finalGold}</div>
+      <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+        ${cardsHTML || '<span style="color: #666;">无卡牌奖励</span>'}
+      </div>
+    `;
+
+    // --- 5. 数据存入 global.json ---
+    const globalData = await storage.load_global('global.json');
+    globalData.money = (globalData.money || 0) + finalGold;
+    if (!globalData.deck) globalData.deck = {};
+
+    rewardedCards.forEach(card => {
+      const cardId = card.id;
+      if (globalData.deck[cardId] !== undefined) {
+        globalData.deck[cardId] += 1;
+      } else {
+        globalData.deck[cardId] = 1;
+      }
+    });
+    await storage.save_global('global.json', globalData);
+
+    // --- 6. 确认按钮 (保持你原有的逻辑) ---
+    const confirmButton = document.createElement('button');
+    confirmButton.textContent = '确认并继续';
+    confirmButton.style.cssText = `
+      margin-top: 40px; padding: 15px 60px; font-size: 20px; font-family: 'Orbitron';
+      background: transparent; color: #00d4ff; border: 2px solid #00d4ff;
+      border-radius: 5px; cursor: pointer; transition: all 0.3s ease;
+      text-transform: uppercase; overflow: hidden; position: relative;
+    `;
+
+    confirmButton.onmouseover = () => {
+      confirmButton.style.background = '#00d4ff';
+      confirmButton.style.color = '#000';
+      confirmButton.style.boxShadow = '0 0 30px #00d4ff';
+    };
+    confirmButton.onmouseout = () => {
+      confirmButton.style.background = 'transparent';
+      confirmButton.style.color = '#00d4ff';
+      confirmButton.style.boxShadow = 'none';
+    };
+
+    confirmButton.onclick = () => {
+      document.body.removeChild(overlay);
+      this.goToMapScreen();
+    };
+
+    container.appendChild(title);
+    container.appendChild(subtitle);
+    container.appendChild(rewardContainer);
+    container.appendChild(confirmButton);
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        container.style.opacity = '1';
+        container.style.transform = 'scale(1)';
+      }, 100);
+    });
   }
 
-  // 跳转到地图界面
   async goToMapScreen() {
     console.log("跳转到地图界面");
 
-    // 确保玩家数据已保存
     if (this.player && this.player.data) {
       await storage.save('playerCur.json', this.player.data);
     }
-
-    // 如果当前节点ID存在，将其添加到全局路径中（只有在胜利时才添加）
     if (this.currentNodeId) {
       const globalData = await storage.load_global('global.json');
       if (!globalData.currentPath.includes(this.currentNodeId)) {
@@ -453,21 +594,15 @@ export class Battle {
         await storage.save_global('global.json', globalData);
       }
     }
-
-    // 清理当前战斗场景
     this.cleanupBattleScene();
 
-    // 直接调用地图界面函数
     const { showMap } = await import('../map/MapMain.js');
     await showMap();
   }
 
-  // 清理战斗场景
   cleanupBattleScene() {
-    // 停止动画循环
     this.gameRunning = false;
 
-    // 移除渲染器
     if (this.renderer && this.renderer.domElement && this.renderer.domElement.parentNode) {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
     }

@@ -10,13 +10,13 @@ let backgroundImg, descriptionDiv, choicesContainer;
 export async function EventMain() {
   // 并行加载配置和全局数据，更快更高效～
   const [eventConfig, globalData] = await Promise.all([
-    storage.load('eventCur.json', { eventName: 'slime_pit' }),
+    storage.load('eventCur.json', { name: 'slime_pit' }),
     storage.load_global('global.json')
   ]);
 
   tempGlobalData = globalData;
 
-  const eventName = eventConfig.eventName || 'slime_pit';
+  const name = eventConfig.name || 'slime_pit';
 
   // 加载事件专用HTML模板
   const response = await fetch('src/ui/event.html');
@@ -40,9 +40,9 @@ export async function EventMain() {
   }
 
   // 创建事件实例
-  currentEvent = EventFactory.create(eventName);
+  currentEvent = EventFactory.create(name);
   if (!currentEvent) {
-    alert(`找不到事件 "${eventName}" 喵～要检查 eventCur.json 哦！`);
+    alert(`找不到事件 "${name}" 喵～要检查 eventCur.json 哦！`);
     return;
   }
 
@@ -66,13 +66,11 @@ export async function EventMain() {
     if (!choicesContainer) return;
     choicesContainer.innerHTML = ''; // 清空旧按钮
 
-    // 只添加一次事件委托（用 data 属性防止重复绑定）
     if (!choicesContainer.dataset.choiceDelegated) {
       choicesContainer.addEventListener('click', (e) => {
         const btn = e.target.closest('button.choice-btn');
         if (!btn) return;
 
-        // 计算当前按钮的索引
         const buttons = choicesContainer.querySelectorAll('button.choice-btn');
         const index = Array.from(buttons).indexOf(btn);
 
