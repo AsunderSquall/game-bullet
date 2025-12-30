@@ -82,6 +82,13 @@ export class Battle {
     this.time += delta;
 
     this.updatePlayer(delta);
+
+    // 检查玩家是否死亡
+    if (this.player && this.player.dead) {
+      this.onPlayerDeath();
+      return;
+    }
+
     this.updateWaves();
     this.updateEnemies(delta);
     this.updateEnemyBullets(delta);
@@ -150,8 +157,8 @@ export class Battle {
 
   // 检查是否满足通关条件
   checkWinCondition() {
-    this.onWin();
-    return;
+    // this.onWin();
+    // return;
     // 只有在所有波次的敌人都已生成后，才检查通关条件
     if (this.allWavesSpawned) {
       // 情况1：所有敌人已被消灭
@@ -205,6 +212,209 @@ export class Battle {
 
     // 如果玩家的z坐标大于最前面敌人的z坐标加上阈值，则认为玩家超过了所有敌人
     return playerZ > maxEnemyZ + PASS_THRESHOLD;
+  }
+
+  // 玩家死亡处理
+  async onPlayerDeath() {
+    console.log("玩家死亡，游戏暂停");
+
+    // 停止游戏运行
+    this.gameRunning = false;
+
+    // 保存玩家死亡状态到全局数据
+    if (this.player && this.player.data) {
+      const globalData = await storage.load_global('global.json');
+      globalData.health = 0; // 设置健康值为0表示死亡
+      globalData.isPlayerDead = true; // 添加专门的死亡状态标记
+      await storage.save_global('global.json', globalData);
+    }
+
+    // 创建死亡界面
+    this.showDeathScreen();
+  }
+
+  // 显示死亡界面
+  showDeathScreen() {
+    // 引入恐怖风格字体
+    const fontLink = document.createElement('link');
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Creepster&display=swap';
+    fontLink.rel = 'stylesheet';
+
+    // 创建半透明覆盖层
+    const overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.color = '#ff6666';
+    overlay.style.zIndex = '1000';
+    overlay.style.pointerEvents = 'auto';
+
+    // 添加主容器
+    const container = document.createElement('div');
+    container.style.textAlign = 'center';
+    container.style.padding = '40px 60px';
+    container.style.backgroundColor = 'rgba(30, 0, 0, 0.7)';
+    container.style.borderRadius = '20px';
+    container.style.boxShadow = '0 0 40px rgba(255, 50, 50, 0.6), inset 0 0 20px rgba(0, 0, 0, 0.5)';
+    container.style.border = '2px solid #990000';
+    container.style.position = 'relative';
+    container.style.overflow = 'hidden';
+    container.style.opacity = '0';
+    container.style.transform = 'scale(0.8)';
+    container.style.transition = 'all 0.5s ease-out';
+    container.style.fontFamily = '"Creepster", "Courier New", monospace, Arial, sans-serif';
+
+    // 添加装饰性元素
+    const decoration = document.createElement('div');
+    decoration.style.position = 'absolute';
+    decoration.style.top = '10px';
+    decoration.style.left = '10px';
+    decoration.style.right = '10px';
+    decoration.style.bottom = '10px';
+    decoration.style.border = '1px solid rgba(255, 100, 100, 0.3)';
+    decoration.style.borderRadius = '15px';
+    decoration.style.pointerEvents = 'none';
+
+    // 添加"你死了"标题
+    const deathTitle = document.createElement('div');
+    deathTitle.textContent = '💀 GAME OVER 💀';
+    deathTitle.style.fontSize = '48px';
+    deathTitle.style.fontWeight = 'bold';
+    deathTitle.style.marginBottom = '20px';
+    deathTitle.style.textShadow = '0 0 10px rgba(255, 50, 50, 0.8), 0 0 20px rgba(255, 0, 0, 0.6)';
+    deathTitle.style.letterSpacing = '3px';
+    deathTitle.style.opacity = '0';
+    deathTitle.style.transform = 'translateY(-20px)';
+    deathTitle.style.transition = 'all 0.8s ease 0.2s';
+    deathTitle.style.fontFamily = '"Creepster", "Courier New", monospace';
+    deathTitle.style.textTransform = 'uppercase';
+
+    // 添加副标题
+    const subtitle = document.createElement('div');
+    subtitle.textContent = '你的冒险到此结束...';
+    subtitle.style.fontSize = '24px';
+    subtitle.style.marginBottom = '30px';
+    subtitle.style.color = '#ff9999';
+    subtitle.style.textShadow = '0 0 5px rgba(255, 100, 100, 0.6)';
+    subtitle.style.opacity = '0';
+    subtitle.style.transform = 'translateY(20px)';
+    subtitle.style.transition = 'all 0.8s ease 0.4s';
+    subtitle.style.fontFamily = '"Creepster", "Courier New", monospace';
+
+    // 添加返回按钮容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.marginTop = '30px';
+    buttonContainer.style.opacity = '0';
+    buttonContainer.style.transition = 'all 0.8s ease 0.6s';
+
+    // 添加返回按钮
+    const backButton = document.createElement('button');
+    backButton.textContent = '返回地图';
+    backButton.style.padding = '15px 40px';
+    backButton.style.fontSize = '22px';
+    backButton.style.fontWeight = 'bold';
+    backButton.style.backgroundColor = '#cc0000';
+    backButton.style.color = 'white';
+    backButton.style.border = 'none';
+    backButton.style.borderRadius = '50px';
+    backButton.style.cursor = 'pointer';
+    backButton.style.margin = '10px';
+    backButton.style.transition = 'all 0.3s ease';
+    backButton.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+    backButton.style.letterSpacing = '1px';
+
+    // 按钮悬停效果
+    backButton.onmouseover = () => {
+      backButton.style.backgroundColor = '#ff3333';
+      backButton.style.transform = 'scale(1.05)';
+      backButton.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.4)';
+    };
+
+    backButton.onmouseout = () => {
+      backButton.style.backgroundColor = '#cc0000';
+      backButton.style.transform = 'scale(1)';
+      backButton.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+    };
+
+    backButton.onclick = () => {
+      // 移除覆盖层
+      document.body.removeChild(overlay);
+      // 移除字体链接
+      if (fontLink.parentNode) {
+        document.head.removeChild(fontLink);
+      }
+      // 跳转到地图界面
+      this.goToMapScreen();
+    };
+
+    // 将元素添加到容器
+    buttonContainer.appendChild(backButton);
+    container.appendChild(deathTitle);
+    container.appendChild(subtitle);
+    container.appendChild(buttonContainer);
+    container.appendChild(decoration);
+
+    // 将容器添加到覆盖层
+    overlay.appendChild(container);
+
+    // 将覆盖层添加到页面
+    document.body.appendChild(overlay);
+
+    // 等待字体加载完成后再添加动画
+    fontLink.onload = () => {
+      // 触发进入动画
+      setTimeout(() => {
+        container.style.opacity = '1';
+        container.style.transform = 'scale(1)';
+
+        setTimeout(() => {
+          deathTitle.style.opacity = '1';
+          deathTitle.style.transform = 'translateY(0)';
+
+          setTimeout(() => {
+            subtitle.style.opacity = '1';
+            subtitle.style.transform = 'translateY(0)';
+
+            setTimeout(() => {
+              buttonContainer.style.opacity = '1';
+            }, 300);
+          }, 300);
+        }, 100);
+      }, 50);
+    };
+
+    // 如果字体加载失败，也显示界面
+    fontLink.onerror = () => {
+      // 触发进入动画
+      setTimeout(() => {
+        container.style.opacity = '1';
+        container.style.transform = 'scale(1)';
+
+        setTimeout(() => {
+          deathTitle.style.opacity = '1';
+          deathTitle.style.transform = 'translateY(0)';
+
+          setTimeout(() => {
+            subtitle.style.opacity = '1';
+            subtitle.style.transform = 'translateY(0)';
+
+            setTimeout(() => {
+              buttonContainer.style.opacity = '1';
+            }, 300);
+          }, 300);
+        }, 100);
+      }, 50);
+    };
+
+    // 添加字体链接到head
+    document.head.appendChild(fontLink);
   }
 
   // 预留的结算画面接口

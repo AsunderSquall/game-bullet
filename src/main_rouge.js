@@ -68,6 +68,30 @@ async function startNewGame() {
 
   await storage.save_global('global.json', globalData);
 
+  // 重置玩家当前数据
+  const playerData = {
+    health: 100,
+    maxHealth: 100,
+    shields: 0,
+    bombs: 3,
+    lives: 2,
+    power: 400,
+    maxPower: 400,
+    hitRadius: 0.6,
+    hitOffsetY: 0.6,
+    grazeRadius: 1.4,
+    attackPower: 28,
+    attackSpeed: 0.09,
+    regenerateInterval: -1.0,
+    regenTimer: 0,
+    totem: 0,
+    bulletType: "sakuya_knife_normal",
+    position: { x: 0, y: 15, z: 0 },
+    upgrades: []
+  };
+
+  await storage.save('playerCur.json', playerData);
+
   console.log('✅ 地图生成成功！');
   document.body.innerHTML = '';
   await showMap();
@@ -77,10 +101,11 @@ async function continueGame() {
   console.log('加载存档中！');
   document.body.innerHTML = '';
   const globalData = await storage.load_global('global.json');
-  if (globalData.currentStatus = 'select') await SelectMain();
-  if (globalData.currentStatus = 'shop') await ShopMain();
-  if (globalData.currentStatus = 'map') await showMap();
-  if (globalData.currentStatus = 'battle') await showMap();
+  if (globalData.currentStatus === 'select') await SelectMain();
+  else if (globalData.currentStatus === 'shop') await ShopMain();
+  else if (globalData.currentStatus === 'map') await showMap();
+  else if (globalData.currentStatus === 'battle') await showMap();
+  else await showMap(); // 默认加载地图
 }
 
 function openSettings() {

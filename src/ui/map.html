@@ -114,6 +114,35 @@
     cursor: default; /* 恢复默认光标 */
   }
 
+  .map-node.unreachable {
+    /* 玩家死亡时，已解锁但未完成的节点 */
+    background: #550000;
+    border-color: #ff3333; /* 红色边框 */
+    cursor: not-allowed;
+    filter: grayscale(50%);
+  }
+
+  .map-node.completed-dead {
+    /* 玩家死亡时，已完成的节点 */
+    background: #330000;
+    border-color: #990000; /* 暗红色边框 */
+    filter: grayscale(70%);
+  }
+
+  /* 确保死亡状态下的样式优先级更高 */
+  .map-node.visited.completed-dead {
+    background: #330000;
+    border-color: #990000; /* 暗红色边框 */
+    filter: grayscale(70%);
+  }
+
+  .map-node.clickable.unreachable {
+    background: #550000;
+    border-color: #ff3333; /* 红色边框 */
+    cursor: not-allowed;
+    filter: grayscale(50%);
+  }
+
   .node-icon { font-size: 36px; margin-bottom: 4px; }
   .node-text { font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px black; }
 </style>
