@@ -14,6 +14,7 @@ export class Weapon002 extends BaseCard {
   }
 
   apply(playerData) {
+    playerData.power = 0;
     playerData.bulletType = 'homeing_knife';
     playerData.attackPower = 20;
     playerData.attackSpeed = 0.12;

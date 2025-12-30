@@ -4,17 +4,17 @@ import { storage } from '../utils/storage.js';
 let currentHealth = 60;
 let maxHealth = 100;
 let healingInterval = null;
-const healingRate = 2; // 每秒恢复2点生命值
+const healingRate = 0.5; // 每秒恢复0.5点生命值，大幅减缓回血速度
 
 export async function showRest() {
   const response = await fetch('src/ui/rest.html');
   if (!response.ok) throw new Error('加载休息HTML失败～');
   document.body.innerHTML = await response.text();
 
-  // 加载全局数据
-  const globalData = await storage.load_global('global.json');
-  currentHealth = globalData.health || 60;
-  maxHealth = globalData.max_health || 100;
+  // 加载玩家当前数据
+  const playerData = await storage.load_global('playerCur.json');
+  currentHealth = playerData.health || 60;
+  maxHealth = playerData.max_health || 100;
 
   // 限制生命值不超过最大值
   if (currentHealth > maxHealth) {
@@ -50,7 +50,7 @@ export async function showRest() {
 }
 
 function startAutoHealing() {
-  // 每秒恢复一定生命值
+  // 每2秒恢复一定生命值 (由于恢复速度降低，间隔可以相应调整)
   healingInterval = setInterval(() => {
     if (currentHealth < maxHealth) {
       // 恢复生命值
@@ -63,11 +63,8 @@ function startAutoHealing() {
 
       updateHealthDisplay();
 
-      // 显示恢复动画
-      document.getElementById('healing-animation').style.display = 'block';
-      setTimeout(() => {
-        document.getElementById('healing-animation').style.display = 'none';
-      }, 500);
+      // 触发恢复动画，使用CSS动画而不是简单的显示/隐藏
+      triggerHealingAnimation();
 
       // 更新消息
       document.getElementById('message').textContent = `生命值正在缓慢恢复中... (${Math.floor(currentHealth)}/${maxHealth})`;
@@ -79,7 +76,42 @@ function startAutoHealing() {
         healingInterval = null;
       }
     }
-  }, 1000); // 每秒恢复一次
+  }, 2000); // 每2秒恢复一次，配合较慢的恢复速度
+}
+
+function triggerHealingAnimation() {
+  // 创建一个临时的动画元素，避免影响布局
+  const animationElement = document.createElement('div');
+  animationElement.textContent = '+0.5';
+  animationElement.style.position = 'fixed';
+  animationElement.style.top = '50%';
+  animationElement.style.left = '50%';
+  animationElement.style.transform = 'translate(-50%, -50%)';
+  animationElement.style.color = '#00ff00';
+  animationElement.style.fontSize = '24px';
+  animationElement.style.fontWeight = 'bold';
+  animationElement.style.pointerEvents = 'none'; // 不影响鼠标事件
+  animationElement.style.zIndex = '9999'; // 确保在最顶层
+  animationElement.style.opacity = '1';
+  animationElement.style.transition = 'opacity 1.5s ease-out';
+  animationElement.style.userSelect = 'none'; // 防止选择文本
+  animationElement.style.mozUserSelect = 'none';
+  animationElement.style.webkitUserSelect = 'none';
+  animationElement.style.msUserSelect = 'none';
+
+  document.body.appendChild(animationElement);
+
+  // 触发淡出动画
+  setTimeout(() => {
+    animationElement.style.opacity = '0';
+  }, 100);
+
+  // 移除元素
+  setTimeout(() => {
+    if (animationElement.parentNode) {
+      animationElement.parentNode.removeChild(animationElement);
+    }
+  }, 1600);
 }
 
 function updateHealthDisplay() {

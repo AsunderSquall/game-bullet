@@ -71,7 +71,9 @@ export class Battle {
     }
 
     this.waves = battleData.waves || [];
-    this.scene.background = new THREE.Color(battleData.background);
+    // Note: 3D background is handled in scene.js, so we don't set a flat background color
+    // If you want to adjust lighting based on background, you can do it here
+    // For now, we'll keep the 3D background as defined in scene.js
 
     // 获取难度设置（如果有的话）
     this.difficulty = sessionStorage.getItem('battleDifficulty') || 'normal';
@@ -101,6 +103,7 @@ export class Battle {
     this.updateEnemyBullets(delta);
     this.updatePlayerBullets(delta);
     this.updateCamera();
+    this.updateBackground(delta); // Update the dynamic background
     updateHUD(currentPlayer);
 
     this.renderer.render(this.scene, this.camera);
@@ -477,6 +480,85 @@ export class Battle {
 
   updateCamera() {
     updateCamera(this.camera, this.player.object);
+  }
+
+  updateBackground(delta) {
+    // Update the starfield to simulate forward movement
+    if (this.scene) {
+      // Update the starfield to move toward the player (creating forward movement illusion)
+      this.scene.traverse((child) => {
+        if (child instanceof THREE.Points && child.userData && child.userData.starCount) {
+          // This is our starfield, update positions to simulate forward movement
+          this.updateStarfield(child, delta);
+        }
+      });
+
+      // Move particles slightly for atmospheric effect
+      this.scene.traverse((child) => {
+        if (child instanceof THREE.Points && child.geometry.attributes.position.count === 200) {
+          // This is our particle field, make it gently rotate
+          child.rotation.y += delta * 0.03;
+        }
+      });
+
+      // Animate lights if they exist
+      if (this.scene.userData && this.scene.userData.lights) {
+        const lights = this.scene.userData.lights;
+        const time = this.time;
+
+        // Animate main light position in a circular pattern
+        if (lights.main) {
+          lights.main.position.x = 400 * Math.sin(time * 0.3);
+          lights.main.position.z = 400 * Math.cos(time * 0.3);
+          lights.main.position.y = 300 + 100 * Math.sin(time * 0.5);
+        }
+
+        // Animate back light position
+        if (lights.back) {
+          lights.back.position.x = -300 * Math.sin(time * 0.2);
+          lights.back.position.z = -300 * Math.cos(time * 0.2);
+          lights.back.position.y = -100 + 50 * Math.cos(time * 0.4);
+        }
+
+        // Animate side light position
+        if (lights.side) {
+          lights.side.position.x = 300 * Math.cos(time * 0.4);
+          lights.side.position.z = 100 * Math.sin(time * 0.3);
+          lights.side.position.y = 200 + 100 * Math.sin(time * 0.6);
+        }
+      }
+    }
+  }
+
+  updateStarfield(stars, delta) {
+    // Get the player's forward movement speed (negative Z direction)
+    const playerSpeed = 60; // Adjust this value to control the speed of movement
+    const movement = playerSpeed * delta;
+
+    // Get the positions array
+    const positions = stars.geometry.attributes.position.array;
+    const radius = stars.userData.radius;
+
+    // Update each star's position to simulate forward movement
+    for (let i = 0; i < positions.length; i += 3) {
+      // Move star away from the player (in the negative Z direction to simulate forward movement)
+      positions[i + 2] -= movement;
+
+      // If a star goes too far behind the player, reset it to the front
+      if (positions[i + 2] < -radius + 100) { // If star is too far behind
+        // Generate new spherical coordinates for the star at the front
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+
+        // Position the star at the front of the sphere (toward player)
+        positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+        positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+        positions[i + 2] = radius * Math.cos(phi);
+      }
+    }
+
+    // Mark the position attribute as needing update
+    stars.geometry.attributes.position.needsUpdate = true;
   }
 
   // 恢复玩家满血

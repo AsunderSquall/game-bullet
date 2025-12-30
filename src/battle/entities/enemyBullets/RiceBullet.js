@@ -15,13 +15,13 @@ export class RiceBullet extends BaseEnemyBullet {
 
   createMesh(options) {
     const geo = new THREE.SphereGeometry(options.size, 16, 12);
-    
-    const mat = new THREE.MeshPhongMaterial({
+
+    const mat = new THREE.MeshStandardMaterial({
       color: options.color,
       emissive: options.color,
-      emissiveIntensity: 1.8,
-      specular: 0xffffff,
-      shininess: 80
+      emissiveIntensity: 0.5,
+      metalness: 0.3,
+      roughness: 0.4
     });
 
     const mesh = new THREE.Mesh(geo, mat);

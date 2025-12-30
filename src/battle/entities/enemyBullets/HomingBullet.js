@@ -17,6 +17,12 @@ export class HomingBullet extends BaseEnemyBullet {
     this.maxTurnAngle = options.maxTurnAngle || 0.05; // 每帧最大转向角度
     this.isPlayerBullet = options.isPlayerBullet || false; // 是否为玩家子弹
     this.velocity = this.direction.clone().multiplyScalar(this.speed);
+
+    // 添加拖曳效果
+    this.trailPositions = [];
+    this.maxTrailLength = 15; // 拖曳长度
+    this.trailUpdateCounter = 0;
+    this.trailUpdateInterval = 0.05; // 拖曳更新间隔
   }
 
   update(delta, player, globalTime) {
@@ -29,6 +35,9 @@ export class HomingBullet extends BaseEnemyBullet {
 
     // 更新位置
     this.mesh.position.add(this.velocity.clone().multiplyScalar(delta));
+
+    // 更新拖曳效果
+    this.updateTrail(delta);
 
     // 调用父类的更新方法
     super.update(delta, player, globalTime);
@@ -62,13 +71,79 @@ export class HomingBullet extends BaseEnemyBullet {
     }
   }
 
+  updateTrail(delta) {
+    // 定期记录位置以创建拖曳效果
+    this.trailUpdateCounter += delta;
+    if (this.trailUpdateCounter >= this.trailUpdateInterval) {
+      this.trailUpdateCounter = 0;
+      this.trailPositions.push(this.mesh.position.clone());
+
+      // 保持拖曳长度
+      if (this.trailPositions.length > this.maxTrailLength) {
+        this.trailPositions.shift();
+      }
+
+      // 更新拖曳几何体
+      if (this.trailLine && this.trailPositions.length > 1) {
+        this.updateTrailGeometry();
+      }
+    }
+  }
+
+  updateTrailGeometry() {
+    const positions = [];
+    for (let i = 0; i < this.trailPositions.length; i++) {
+      const pos = this.trailPositions[i];
+      positions.push(pos.x, pos.y, pos.z);
+    }
+
+    if (positions.length > 0) {
+      const positionAttribute = new THREE.Float32BufferAttribute(positions, 3);
+      this.trailLine.geometry.setAttribute('position', positionAttribute);
+      this.trailLine.geometry.attributes.position.needsUpdate = true;
+    }
+  }
+
   createMesh(options) {
+    // 创建子弹主体
     const geometry = new THREE.SphereGeometry(this.size, 8, 8);
-    const material = new THREE.MeshBasicMaterial({ 
+    const material = new THREE.MeshStandardMaterial({
       color: options.color || 0xff66ff,
-      emissive: 0xff00ff,
-      emissiveIntensity: 0.8
+      emissive: options.color || 0xff66ff,
+      emissiveIntensity: 0.5,
+      metalness: 0.3,
+      roughness: 0.4
     });
-    return new THREE.Mesh(geometry, material);
+    const bulletMesh = new THREE.Mesh(geometry, material);
+
+    // 创建拖曳线
+    const trailGeometry = new THREE.BufferGeometry();
+    const trailMaterial = new THREE.LineBasicMaterial({
+      color: new THREE.Color(options.color || 0xff66ff),
+      transparent: true,
+      opacity: 0.7,
+      linewidth: 2
+    });
+
+    this.trailLine = new THREE.Line(trailGeometry, trailMaterial);
+    this.scene.add(this.trailLine);
+
+    return bulletMesh;
+  }
+
+  destroy() {
+    // 销毁拖曳线
+    if (this.trailLine) {
+      this.scene.remove(this.trailLine);
+      this.trailLine.geometry.dispose();
+      this.trailLine.material.dispose();
+      this.trailLine = null;
+    }
+
+    // 清空拖曳位置数组
+    this.trailPositions = [];
+
+    // 调用父类销毁方法
+    super.destroy();
   }
 }
