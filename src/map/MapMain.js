@@ -118,6 +118,36 @@ async function selectNode(node) {
 
   alert(`即将进入 ${node.type.toUpperCase()} 房间～✨`);
 
-  const pages = { shop: 'shop.html', rest: 'rest.html', boss: 'boss.html' };
-  location.href = pages[node.type] || 'battle.html';
+  if (node.type === 'shop') {
+    // 加载商店界面
+    import('../shop/ShopMain.js').then(({ showShop }) => {
+      // 清空当前页面内容，为商店界面做准备
+      document.body.innerHTML = '<div id="shop-container"></div>';
+      showShop();
+    }).catch(err => {
+      console.error('加载商店界面失败:', err);
+    });
+  } else if (node.type === 'rest') {
+    // 预留rest界面的接口，稍后会创建
+    console.log('进入休息房间');
+    // 这里可以预留rest界面的接口
+  } else if (node.type === 'event') {
+    // 预留event节点的接口
+    console.log('进入事件房间');
+    // 这里可以预留event界面的接口
+  } else if (node.type === 'boss') {
+    // 预留boss节点的接口
+    console.log('进入BOSS房间');
+    // 这里可以预留boss界面的接口
+  } else {
+    // 其他类型（normal, elite）都进入战斗场景
+    // 先清空当前页面内容，然后启动战斗场景
+    document.body.innerHTML = '<div id="battle-container"></div>';
+    import('../battle/battle.js').then(({ Battle }) => {
+      const game = new Battle();
+      game.start('battleCur.json');
+    }).catch(err => {
+      console.error('加载战斗场景失败:', err);
+    });
+  }
 }
