@@ -1,11 +1,17 @@
 {
-  "money": 100,
-  "health": 100,
-  "bomb": 0,
-  "currentPath": [],
+  "money": 25,
+  "health": 89,
+  "bomb": 1,
+  "currentPath": [
+    "0-2",
+    "1-2",
+    "2-1",
+    "3-0"
+  ],
   "deck": {
     "weapon001": 1,
-    "passive001": 1
+    "passive001": 0,
+    "passive002": 0
   },
   "max_passive_slots": 2,
   "max_energy": 3,
@@ -14,37 +20,37 @@
       [
         {
           "id": "0-0",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 0
         },
         {
           "id": "0-1",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 1
         },
         {
           "id": "0-2",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 2
         },
         {
           "id": "0-3",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 3
         },
         {
           "id": "0-4",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 4
         },
         {
           "id": "0-5",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 5
         }
@@ -52,19 +58,19 @@
       [
         {
           "id": "1-0",
-          "type": "rest",
+          "type": "elite",
           "layer": 1,
           "index": 0
         },
         {
           "id": "1-1",
-          "type": "rest",
+          "type": "shop",
           "layer": 1,
           "index": 1
         },
         {
           "id": "1-2",
-          "type": "rest",
+          "type": "shop",
           "layer": 1,
           "index": 2
         },
@@ -73,26 +79,44 @@
           "type": "event",
           "layer": 1,
           "index": 3
+        },
+        {
+          "id": "1-4",
+          "type": "shop",
+          "layer": 1,
+          "index": 4
+        },
+        {
+          "id": "1-5",
+          "type": "normal",
+          "layer": 1,
+          "index": 5
         }
       ],
       [
         {
           "id": "2-0",
-          "type": "rest",
+          "type": "event",
           "layer": 2,
           "index": 0
         },
         {
           "id": "2-1",
-          "type": "normal",
+          "type": "shop",
           "layer": 2,
           "index": 1
         },
         {
           "id": "2-2",
-          "type": "elite",
+          "type": "event",
           "layer": 2,
           "index": 2
+        },
+        {
+          "id": "2-3",
+          "type": "rest",
+          "layer": 2,
+          "index": 3
         }
       ],
       [
@@ -104,13 +128,13 @@
         },
         {
           "id": "3-1",
-          "type": "rest",
+          "type": "normal",
           "layer": 3,
           "index": 1
         },
         {
           "id": "3-2",
-          "type": "normal",
+          "type": "shop",
           "layer": 3,
           "index": 2
         }
@@ -118,65 +142,65 @@
       [
         {
           "id": "4-0",
-          "type": "rest",
+          "type": "normal",
           "layer": 4,
           "index": 0
         },
         {
           "id": "4-1",
-          "type": "rest",
+          "type": "elite",
           "layer": 4,
           "index": 1
         },
         {
           "id": "4-2",
-          "type": "rest",
+          "type": "shop",
           "layer": 4,
           "index": 2
         },
         {
           "id": "4-3",
-          "type": "normal",
+          "type": "event",
           "layer": 4,
           "index": 3
+        },
+        {
+          "id": "4-4",
+          "type": "normal",
+          "layer": 4,
+          "index": 4
         }
       ],
       [
         {
           "id": "5-0",
-          "type": "rest",
+          "type": "event",
           "layer": 5,
           "index": 0
         },
         {
           "id": "5-1",
-          "type": "event",
+          "type": "normal",
           "layer": 5,
           "index": 1
         },
         {
           "id": "5-2",
-          "type": "normal",
+          "type": "event",
           "layer": 5,
           "index": 2
-        },
-        {
-          "id": "5-3",
-          "type": "elite",
-          "layer": 5,
-          "index": 3
         }
       ],
       [
         {
           "id": "6-0",
-          "type": "normal",
+          "type": "rest",
           "layer": 6,
           "index": 0
         },
         {
           "id": "6-1",
-          "type": "normal",
+          "type": "event",
           "layer": 6,
           "index": 1
         },
@@ -188,9 +212,21 @@
         },
         {
           "id": "6-3",
-          "type": "rest",
+          "type": "event",
           "layer": 6,
           "index": 3
+        },
+        {
+          "id": "6-4",
+          "type": "rest",
+          "layer": 6,
+          "index": 4
+        },
+        {
+          "id": "6-5",
+          "type": "event",
+          "layer": 6,
+          "index": 5
         }
       ],
       [
@@ -246,32 +282,56 @@
         "to": "1-0"
       },
       {
-        "from": "0-1",
-        "to": "1-0"
-      },
-      {
-        "from": "0-2",
+        "from": "0-0",
         "to": "1-1"
       },
       {
-        "from": "0-3",
+        "from": "0-1",
+        "to": "1-1"
+      },
+      {
+        "from": "0-1",
         "to": "1-2"
       },
       {
-        "from": "0-4",
+        "from": "0-2",
+        "to": "1-2"
+      },
+      {
+        "from": "0-2",
         "to": "1-3"
       },
       {
-        "from": "0-5",
+        "from": "0-3",
         "to": "1-3"
+      },
+      {
+        "from": "0-3",
+        "to": "1-4"
+      },
+      {
+        "from": "0-4",
+        "to": "1-4"
+      },
+      {
+        "from": "0-4",
+        "to": "1-5"
+      },
+      {
+        "from": "0-5",
+        "to": "1-5"
+      },
+      {
+        "from": "0-5",
+        "to": "1-5"
       },
       {
         "from": "1-0",
         "to": "2-0"
       },
       {
-        "from": "1-1",
-        "to": "2-0"
+        "from": "1-0",
+        "to": "2-1"
       },
       {
         "from": "1-1",
@@ -280,14 +340,22 @@
       {
         "from": "1-2",
         "to": "2-1"
-      },
-      {
-        "from": "1-2",
-        "to": "2-2"
       },
       {
         "from": "1-3",
         "to": "2-2"
+      },
+      {
+        "from": "1-3",
+        "to": "2-3"
+      },
+      {
+        "from": "1-4",
+        "to": "2-3"
+      },
+      {
+        "from": "1-5",
+        "to": "2-3"
       },
       {
         "from": "2-0",
@@ -306,7 +374,11 @@
         "to": "3-1"
       },
       {
-        "from": "2-2",
+        "from": "2-3",
+        "to": "3-1"
+      },
+      {
+        "from": "2-3",
         "to": "3-2"
       },
       {
@@ -327,43 +399,31 @@
       },
       {
         "from": "3-2",
-        "to": "4-2"
+        "to": "4-3"
       },
       {
         "from": "3-2",
-        "to": "4-3"
+        "to": "4-4"
       },
       {
         "from": "4-0",
         "to": "5-0"
       },
       {
-        "from": "4-0",
-        "to": "5-1"
-      },
-      {
         "from": "4-1",
-        "to": "5-1"
-      },
-      {
-        "from": "4-1",
-        "to": "5-2"
+        "to": "5-0"
       },
       {
         "from": "4-2",
+        "to": "5-1"
+      },
+      {
+        "from": "4-3",
         "to": "5-2"
       },
       {
-        "from": "4-2",
-        "to": "5-3"
-      },
-      {
-        "from": "4-3",
-        "to": "5-3"
-      },
-      {
-        "from": "4-3",
-        "to": "5-3"
+        "from": "4-4",
+        "to": "5-2"
       },
       {
         "from": "5-0",
@@ -375,27 +435,19 @@
       },
       {
         "from": "5-1",
-        "to": "6-1"
+        "to": "6-2"
       },
       {
         "from": "5-1",
-        "to": "6-2"
+        "to": "6-3"
       },
       {
         "from": "5-2",
-        "to": "6-2"
+        "to": "6-4"
       },
       {
         "from": "5-2",
-        "to": "6-3"
-      },
-      {
-        "from": "5-3",
-        "to": "6-3"
-      },
-      {
-        "from": "5-3",
-        "to": "6-3"
+        "to": "6-5"
       },
       {
         "from": "6-0",
@@ -423,10 +475,22 @@
       },
       {
         "from": "6-3",
+        "to": "7-3"
+      },
+      {
+        "from": "6-4",
+        "to": "7-3"
+      },
+      {
+        "from": "6-4",
         "to": "7-4"
       },
       {
-        "from": "6-3",
+        "from": "6-5",
+        "to": "7-4"
+      },
+      {
+        "from": "6-5",
         "to": "7-5"
       },
       {
@@ -454,5 +518,9 @@
         "to": "8-0"
       }
     ]
-  }
+  },
+  "currentStatus": "battle",
+  "PostsPrice": 100,
+  "EnergyPrice": 100,
+  "BombPrice": 100
 }

@@ -1,51 +1,120 @@
-<!-- src/ui/Event.html -->
-<div id="event-container" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85) center/cover no-repeat;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-family: 'Microsoft YaHei', sans-serif;
-  font-size: 24px;
-  z-index: 1000;
-  pointer-events: auto;
-">
-  <div id="event-description" style="
-    max-width: 800px;
-    padding: 30px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 15px;
-    text-align: center;
-    line-height: 1.8;
-    margin-bottom: 40px;
-    white-space: pre-wrap;
-  "></div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>事件发生！</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #000;
+      color: #fff;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-  <div id="event-choices" style="
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 600px;
-    width: 90%;
-  "></div>
-</div>
+    #event-background {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.65;
+      display: none;
+      z-index: 1;
+    }
 
-<style>
-  .event-choice-btn {
-    padding: 18px 30px;
-    font-size: 22px;
-    background: rgba(255,100,100,0.8);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  .event-choice-btn:hover {
-    background: rgba(255,150,150,0.9);
-    transform: scale(1.05);
-  }
-</style>
+    #event-container {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 40px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    }
+
+    #event-description {
+      max-width: 800px;
+      font-size: 24px;
+      line-height: 1.8;
+      text-align: center;
+      margin-bottom: 60px;
+      padding: 30px;
+      background: rgba(20, 20, 40, 0.7);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(102, 204, 255, 0.4);
+      white-space: pre-wrap;
+      text-shadow: 0 0 10px #66ccff;
+    }
+
+    #event-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .choice-btn {
+      padding: 18px 40px;
+      font-size: 22px;
+      background: #2266aa;
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(102, 204, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .choice-btn:hover {
+      background: #4488ff;
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(102, 204, 255, 0.8);
+    }
+
+    .choice-btn:disabled {
+      background: #444;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    #back-btn {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 36px;
+      font-size: 18px;
+      background: #aa3333;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    #back-btn:hover {
+      background: #ff5555;
+    }
+  </style>
+</head>
+<body>
+
+  <img id="event-background" alt="事件背景" />
+
+  <div id="event-container">
+    <div id="event-description">加载中喵～</div>
+
+    <div id="event-choices">
+      <!-- 选项会动态生成 -->
+    </div>
+  </div>
+
+
+</body>
+</html>

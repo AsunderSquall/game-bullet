@@ -1,6 +1,7 @@
 import { storage } from '../utils/storage.js';
 import { tempPlayerDefault } from '../defaults/tempPlayerDefault.js';
 import { createCardFromId } from '../cards/CardFactory.js';
+import { Battle } from '../battle/battle.js';
 
 // 临时全局数据（内存操作）
 let tempGlobalData = null;
@@ -124,9 +125,8 @@ async function init() {
       tempGlobalData.currentStatus = 'battle';
 
       await storage.save_global('global.json', tempGlobalData);
-
-      alert('确认出战！玩家状态已保存～去战斗吧！✨');
-      // location.href = 'battle.html';
+      const game = new Battle();
+      await game.start('battleCur.json');
     } catch (err) {
       alert('保存失败了～进度可能丢失(>﹏<)');
       console.error(err);

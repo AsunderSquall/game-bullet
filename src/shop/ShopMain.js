@@ -163,6 +163,7 @@ async function init() {
       tempGlobalData.bomb = currentBomb;
 
       try {
+        tempGlobalData.currentStatus = 'map';
         await storage.save_global('global.json', tempGlobalData);
         alert('存档已保存');
         // 跳转到地图界面

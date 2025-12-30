@@ -13,6 +13,7 @@ export class SingleLayerEvent {
 
   // 开始事件（直接显示描述和选项）
   async start() {
+    console.log("single event start");
     const globalData = await storage.load_global('global.json');
 
     // 通知UI
@@ -26,20 +27,19 @@ export class SingleLayerEvent {
 
   async selectChoice(choiceIndex) {
     if (!this.isRunning || choiceIndex < 0 || choiceIndex >= this.choices.length) {
-      console.warn('无效的选择喵~');
+      console.warn('无效的选择喵');
       return;
     }
 
     const selected = this.choices[choiceIndex];
-
     if (selected.effect) {
       selected.effect(this.globalData);
     }
-
+    this.globalData.currentStatus = 'map';
     await storage.save_global('global.json', this.globalData);
     this.isRunning = false;
     this.onEventEnd?.();
-    console.log('单层事件结束，global.json已保存～');
+    console.log('单层事件结束，global.json已保存');
   }
 
   // ======== UI回调钩子 ========

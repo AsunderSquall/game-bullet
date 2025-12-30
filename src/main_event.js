@@ -1,7 +1,4 @@
-import { eventMain } from './event/EventMain.js';
-import { storage } from './utils/storage.js';
+import { EventMain } from './event/EventMain.js';
 
-await storage.save('eventCur.json', { name: 'slime_pit' });
-
-// 启动事件！
-await eventMain.startEvent();
+// 直接调用，不用传任何参数！
+EventMain();

@@ -4,6 +4,9 @@ import { createMap } from './map/CreateMap.js';
 import { showMap } from './map/MapMain.js';
 import { SelectMain } from './select/SelectMain.js';
 import { ShopMain } from './shop/ShopMain.js';
+import { Battle } from './battle/battle.js';
+import { showRest } from './select/RestMain.js';
+import { EventMain } from './event/EventMain.js';
 
 console.log('✨ 猫娘来啦～欢迎主人进入弹幕冒险世界！');
 
@@ -104,7 +107,12 @@ async function continueGame() {
   if (globalData.currentStatus === 'select') await SelectMain();
   else if (globalData.currentStatus === 'shop') await ShopMain();
   else if (globalData.currentStatus === 'map') await showMap();
-  else if (globalData.currentStatus === 'battle') await showMap();
+  else if (globalData.currentStatus === 'rest') await showRest();
+  else if (globalData.currentStatus === 'event') await EventMain();
+  else if (globalData.currentStatus === 'battle') {
+    const game = new Battle();
+    await game.start('battleCur.json');
+  }
   else await showMap(); // 默认加载地图
 }
 

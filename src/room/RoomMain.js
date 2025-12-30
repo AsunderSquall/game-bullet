@@ -2,7 +2,8 @@
 import { storage } from '../utils/storage.js';
 import { ShopMain } from '../shop/ShopMain.js';
 import { SelectMain } from '../select/SelectMain.js';
-// import { showEvent } from '../event/EventMain.js';
+import { showRest } from '../select/RestMain.js';
+import { EventMain } from '../event/EventMain.js';
 
 export async function enterRoom(type) {
   const globalData = await storage.load_global('global.json');
@@ -53,7 +54,7 @@ export async function enterRoom(type) {
       rewards: { cards: 3, gold: 100 }  // 猫娘随便加个奖励，主人可以改～
     };
       break;
-
+    
     case 'elite':
       roomData = {
       name: "测试关卡",
@@ -94,8 +95,14 @@ export async function enterRoom(type) {
           ]
         }
       ],
-      rewards: { cards: 3, gold: 100 }  // 猫娘随便加个奖励，主人可以改～
+      rewards: { cards: 3, gold: 100 }
     };
+      break;
+
+    case 'event':
+      roomData = {
+        name: "slime_pit",
+      };
       break;
 
     case 'shop':
@@ -144,11 +151,22 @@ export async function enterRoom(type) {
     case 'elite':
     case 'boss':
       globalData.currentStatus = 'select';
+      
+      await storage.save('battleCur.json',roomData)
       await storage.save_global('global.json', globalData);
       await SelectMain();
       break;
     case 'shop':
+      await storage.save('shopCur.json',roomData)
       await ShopMain();
+      break;
+    case 'rest':
+      await showRest();
+      break;
+    case 'event':
+      await storage.save('eventCur.json',roomData)
+      console.log("event start");
+      await EventMain();
       break;
     default:
       alert(`进入${roomData.name}～功能开发中喵！`);

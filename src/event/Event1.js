@@ -13,6 +13,8 @@ export const slimePitEvent = new SingleLayerEvent({
       effect: (data) => {
         data.money += 75;
         data.health = Math.max(0, data.health - 11);
+        
+        console.log("new money=",data.money);
       }
     },
     {
@@ -20,6 +22,7 @@ export const slimePitEvent = new SingleLayerEvent({
       effect: (data) => {
         const loss = Math.floor(Math.random() * 31) + 20;
         data.money = Math.max(0, data.money - loss);
+        console.log("new money=",data.money);
       }
     }
   ]

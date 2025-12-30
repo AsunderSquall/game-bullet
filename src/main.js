@@ -7,10 +7,7 @@ THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 import { Battle } from './battle/battle.js';
-import { storage } from './utils/storage.js';
-
 await storage.load('playerCur.json');
-
 const game = new Battle();
 await game.start('battleCur.json');
 

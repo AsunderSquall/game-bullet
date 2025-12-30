@@ -3,7 +3,7 @@
   "background": "0x000022",
   "waves": [
     {
-      "time": 1.0,
+      "time": 1,
       "enemies": [
         {
           "type": "fairy_blue",
@@ -18,12 +18,11 @@
             "bulletCount": 24,
             "bulletSpeed": 20
           }
-        } 
+        }
       ]
-    } , 
-
+    },
     {
-      "time": 15.0,
+      "time": 15,
       "enemies": [
         {
           "type": "fairy_red",
@@ -38,7 +37,7 @@
             "bulletCount": 24,
             "bulletSpeed": 20
           }
-        } ,
+        },
         {
           "type": "fairy_red",
           "position": {
@@ -52,7 +51,7 @@
             "bulletCount": 24,
             "bulletSpeed": 20
           }
-        }, 
+        },
         {
           "type": "fairy_red",
           "position": {
@@ -69,5 +68,9 @@
         }
       ]
     }
-  ]
+  ],
+  "rewards": {
+    "cards": 3,
+    "gold": 100
+  }
 }

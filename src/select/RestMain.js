@@ -37,6 +37,7 @@ export async function showRest() {
     // 保存当前健康状态
     const globalData = await storage.load_global('global.json');
     globalData.health = currentHealth;
+    globalData.currentStatus = 'map';
     await storage.save_global('global.json', globalData);
 
     // 跳转到地图界面
