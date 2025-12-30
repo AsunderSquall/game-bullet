@@ -380,7 +380,8 @@
     "passive002": 1,
     "passive003": 0,
     "passive004": 1,
-    "weapon003": 1
+    "weapon003": 1,
+    "goldpassive006": 1
   },
   "max_passive_slots": 4,
   "max_energy": 5,
