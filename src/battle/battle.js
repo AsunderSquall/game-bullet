@@ -180,8 +180,8 @@ export class Battle {
 
   // 检查是否满足通关条件
   checkWinCondition() {
-    this.onWin();
-    return;
+    // this.onWin();
+    // return;
     // 只有在所有波次的敌人都已生成后，才检查通关条件
     if (this.allWavesSpawned) {
       // 情况1：所有敌人已被消灭
