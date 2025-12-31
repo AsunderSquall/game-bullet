@@ -49,10 +49,24 @@ export async function EventMain() {
   // 设置背景回调
   currentEvent.onBackgroundChange = (url) => {
     if (url && backgroundImg) {
-      backgroundImg.src = url;
+      // 如果传入的是事件名称而不是完整URL，构建对应的背景图片路径
+      if (!url.includes('/') && !url.includes('.')) {
+        backgroundImg.src = `picture/event/${url}Event.png`;
+      } else {
+        backgroundImg.src = url;
+      }
       backgroundImg.style.display = 'block';
+      // 设置透明度
+      backgroundImg.style.opacity = '0.6'; // 60% opacity
+
+      // Apply theme based on event type
+      applyEventTheme(url);
     } else if (backgroundImg) {
       backgroundImg.style.display = 'none';
+      // Remove theme when no background
+      if (document.getElementById('event-container')) {
+        document.getElementById('event-container').className = '';
+      }
     }
   };
 
@@ -119,4 +133,31 @@ async function selectChoice(index) {
   });
   console.log("start selectChoice inside");
   await currentEvent.selectChoice(index);
+}
+
+// Apply theme based on event type
+function applyEventTheme(eventType) {
+  const container = document.getElementById('event-container');
+  if (!container) return;
+
+  // Remove existing theme classes
+  container.className = container.className.replace(/(\w+)-theme/g, '').trim();
+
+  // Determine theme based on event type
+  let themeClass = 'misc-theme'; // default theme
+
+  if (eventType.toLowerCase().includes('fairy')) {
+    themeClass = 'fairy-theme';
+  } else if (eventType.toLowerCase().includes('chest') || eventType.toLowerCase().includes('armory')) {
+    themeClass = 'chest-theme';
+  } else if (eventType.toLowerCase().includes('veteran') || eventType.toLowerCase().includes('battle')) {
+    themeClass = 'battle-theme';
+  } else if (eventType.toLowerCase().includes('beggar') || eventType.toLowerCase().includes('elder')) {
+    themeClass = 'beggar-theme';
+  } else if (eventType.toLowerCase().includes('slime') || eventType.toLowerCase().includes('pit')) {
+    themeClass = 'mystic-theme';
+  }
+
+  // Apply the theme class
+  container.classList.add(themeClass);
 }
