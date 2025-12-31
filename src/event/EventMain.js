@@ -42,7 +42,7 @@ export async function EventMain() {
   // 创建事件实例
   currentEvent = EventFactory.create(name);
   if (!currentEvent) {
-    alert(`找不到事件 "${name}" 喵～要检查 eventCur.json 哦！`);
+    alert(`找不到事件 "${name}" ！`);
     return;
   }
 

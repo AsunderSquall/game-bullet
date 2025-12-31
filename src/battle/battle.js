@@ -567,16 +567,15 @@ async showVictoryScreen() {
   async goToMapScreen() {
     console.log("跳转到地图界面");
 
-    if (this.player && this.player.data) {
-      await storage.save('playerCur.json', this.player.data);
-    }
+    const globalData = await storage.load_global('global.json');
+    globalData.health = this.player.data.health;
+    globalData.currentStatus = 'map';
     if (this.currentNodeId) {
-      const globalData = await storage.load_global('global.json');
       if (!globalData.currentPath.includes(this.currentNodeId)) {
         globalData.currentPath.push(this.currentNodeId);
-        await storage.save_global('global.json', globalData);
       }
     }
+    await storage.save_global('global.json', globalData);
     this.cleanupBattleScene();
 
     const { showMap } = await import('../map/MapMain.js');

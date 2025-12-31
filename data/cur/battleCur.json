@@ -1,73 +1,22 @@
 {
-  "name": "普通关卡",
-  "background": "0x000022",
+  "name": "最终房间",
+  "background": "0x000000",
   "waves": [
     {
-      "time": 1,
+      "time": 5,
       "enemies": [
         {
-          "type": "fairy_red",
+          "type": "boss",
           "position": {
             "x": 0,
-            "y": 100,
-            "z": 200
-          },
-          "hp": 2000,
-          "options": {
-            "damage": 8,
-            "forwardSpeed": 10
-          }
-        },
-        {
-          "type": "spiral_enemy",
-          "position": {
-            "x": 0,
-            "y": 100,
-            "z": 300
-          },
-          "hp": 600,
-          "options": {
-            "damage": 6,
-            "forwardSpeed": 4
-          }
-        },
-        {
-          "type": "spiral_enemy",
-          "position": {
-            "x": 0,
-            "y": 100,
+            "y": 300,
             "z": 400
           },
-          "hp": 600,
-          "options": {
-            "damage": 6,
-            "forwardSpeed": 4
-          }
-        }
-      ]
-    },
-    {
-      "time": 15,
-      "enemies": [
-        {
-          "type": "circle_enemy",
-          "position": {
-            "x": 0,
-            "y": 100,
-            "z": 400
-          },
-          "hp": 1600,
-          "options": {
-            "damage": 12,
-            "forwardSpeed": 6
-          }
+          "hp": 250000,
+          "options": {}
         }
       ]
     }
   ],
-  "rewards": {
-    "cards": 3,
-    "gold": 100
-  },
-  "type": "normal"
+  "type": "boss"
 }

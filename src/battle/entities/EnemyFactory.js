@@ -4,6 +4,7 @@ import { CircleEnemy } from './enemies/CircleEnemy.js';
 import { WaveEnemy } from './enemies/WaveEnemy.js';
 import { TrackerEnemy } from './enemies/TrackerEnemy.js';
 import { SpiralEnemy } from './enemies/SpiralEnemy.js';
+import { GalacticBoss } from './enemies/boss1.js';
 
 const registry = {
   'fairy_red': FairyRed,
@@ -12,6 +13,7 @@ const registry = {
   'wave_enemy': WaveEnemy,
   'tracker_enemy': TrackerEnemy,
   'spiral_enemy': SpiralEnemy,
+  'boss': GalacticBoss
 };
 
 export class EnemyFactory {
