@@ -17,8 +17,8 @@ export class GalacticBoss extends Enemy {
 
         this.lastShootTime = 0;
         this.shootIntervals = {
-            spiral: 0.12,   // 略微加快发射频率以匹配高速
-            star: 0.35,     
+            spiral: 0.12,
+            star: 0.30,     
             nebula: 0.06    
         };
     }
@@ -96,9 +96,6 @@ export class GalacticBoss extends Enemy {
         return false;
     }
 
-    /**
-     * 弹幕 1：螺旋推进 (Z轴分量强化)
-     */
     shootSpiralPetals() {
         this.patternAngle += 0.4;
         const arms = 5;
@@ -107,17 +104,13 @@ export class GalacticBoss extends Enemy {
             const dir = new THREE.Vector3(
                 Math.cos(angle) * 0.3, // 减小XY扩散比例
                 Math.sin(angle) * 0.3, 
-                -4.0                   // Z轴速度加倍 (原为 -1.0)
+                -4.0
             ).normalize();
 
-            // 速度提升至 60 (原为 20)
-            this.fireBullet(dir, 0x00ffff, 60, 2.5);
+            this.fireBullet(dir, 0x00ffff, 60, 1.5);
         }
     }
 
-    /**
-     * 弹幕 2：狂暴五角星 (Z轴极速)
-     */
     shootMovingStar() {
         const points = 5;
         const bulletsPerSide = 6;
@@ -135,21 +128,17 @@ export class GalacticBoss extends Enemy {
                 const x = p1.x * (1 - t) + p2.x * t;
                 const y = p1.y * (1 - t) + p2.y * t;
 
-                // 强化 Z轴权重
                 const dir = new THREE.Vector3(x * 0.5, y * 0.5, -4.0).normalize();
-                this.fireBullet(dir, 0xffaa00, 70, 2.0);
+                this.fireBullet(dir, 0xffaa00, 70, 1.0);
             }
         }
     }
 
-    /**
-     * 弹幕 3：星云大爆发
-     */
     shootNebula(globalTime) {
         const count = 16;
         for (let i = 0; i < count; i++) {
             const angle = (i / count) * Math.PI * 2;
-            const speedVar = 50 + Math.sin(globalTime * 4) * 15; // 整体基数从 15 提至 50
+            const speedVar = 50 + Math.sin(globalTime * 4) * 15; 
             
             const dir = new THREE.Vector3(
                 Math.cos(angle) * 0.2,
@@ -157,7 +146,7 @@ export class GalacticBoss extends Enemy {
                 -4.0
             ).normalize();
 
-            this.fireBullet(dir, 0xff00aa, speedVar, 3);
+            this.fireBullet(dir, 0xff00aa, speedVar, 2);
         }
     }
 

@@ -149,6 +149,7 @@ export class Battle {
           this.killedEnemiesCount++;
           e._countedAsKilled = true;
           console.log(`击杀确认！当前击杀数: ${this.killedEnemiesCount}`);
+          if (this.player.upgrades)
         }
         
         return false;

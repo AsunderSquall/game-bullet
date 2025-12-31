@@ -61,7 +61,7 @@ export async function EventMain() {
     if (descriptionDiv) descriptionDiv.textContent = text;
   };
 
-  // 设置选项回调 —— 【关键修复】使用事件委托，完美解决 document.write 后 onclick 失效问题！
+  // 设置选项回调 —— 【关键修复】使用事件委托，解决 document.write 后 onclick 失效问题！
   currentEvent.onChoicesChange = (choiceTexts) => {
     if (!choicesContainer) return;
     choicesContainer.innerHTML = ''; // 清空旧按钮
