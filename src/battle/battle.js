@@ -834,6 +834,26 @@ async showVictoryScreen() {
           lights.side.position.z = 100 * Math.sin(time * 0.3);
           lights.side.position.y = 200 + 100 * Math.sin(time * 0.6);
         }
+
+        // Animate blood moon if it exists
+        if (this.scene.userData && this.scene.userData.bloodMoon) {
+          const bloodMoon = this.scene.userData.bloodMoon;
+          const moonLight = this.scene.userData.moonLight;
+
+          // Move the moon slowly in a way that keeps it visible in the side-front
+          bloodMoon.position.x = -200 + 50 * Math.sin(time * 0.02);  // Gentle horizontal movement
+          bloodMoon.position.y = 400 + 30 * Math.cos(time * 0.03);   // Gentle vertical movement
+          bloodMoon.position.z = 800 + 20 * Math.sin(time * 0.01);  // Gentle depth movement
+
+          // Update the moon light position to match the moon
+          if (moonLight) {
+            moonLight.position.copy(bloodMoon.position);
+
+            // Add subtle pulsing to the moon's glow
+            const glowIntensity = 0.6 + 0.15 * Math.sin(time * 1.5);
+            moonLight.intensity = glowIntensity;
+          }
+        }
       }
     }
   }

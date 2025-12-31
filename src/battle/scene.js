@@ -5,8 +5,8 @@ export function createScene() {
   // Remove the flat background color to allow for 3D background elements
   // scene.background = new THREE.Color(0x222222);
 
-  // Add ambient light
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+  // Add ambient light with a subtle reddish tint to complement the blood moon
+  const ambientLight = new THREE.AmbientLight(0xffcccc, 0.5);
   scene.add(ambientLight);
 
   // Add main directional light (sun-like) - will be animated
@@ -42,8 +42,11 @@ export function createScene() {
     }
   };
 
-  // Create background image (farthest back)
-  createBackgroundImage(scene);
+  // Create blood moon
+  createBloodMoon(scene);
+
+  // Create sky sphere (farthest back)
+  createSkySphere(scene);
 
   // Create starfield background (in front of background image)
   createStarfield(scene);
@@ -54,25 +57,6 @@ export function createScene() {
   // Create mid-ground elements
   createMidgroundElements(scene);
 
-  // Create floor with more interesting material
-  const floorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x445566,
-    roughness: 0.8,
-    metalness: 0.2,
-    wireframe: false
-  });
-
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), floorMaterial);
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = 0;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-
-  // Add a subtle floor grid for reference
-  const gridHelper = new THREE.GridHelper(1000, 20, 0x444466, 0x222244);
-  gridHelper.position.y = 0;
-  scene.add(gridHelper);
 
   return scene;
 }
@@ -117,55 +101,94 @@ function createStarfield(scene) {
   };
 }
 
-// Function to create a background image using a panoramic texture
-function createBackgroundImage(scene) {
-  // Create a background using a panoramic image
-  // You'll need to place your panoramic image in the assets folder
+// Function to create a sky sphere background
+function createSkySphere(scene) {
+  // Create a sphere for the sky - not too large to avoid clipping issues
+  const skyGeometry = new THREE.SphereGeometry(1100, 64, 64); // Smaller size to fit within view frustum
+
+  // Load sky texture
   const textureLoader = new THREE.TextureLoader();
-
-  // Create a large sphere geometry for the background image (inverted normals so we see inside)
-  const bgGeometry = new THREE.SphereGeometry(2000, 64, 64); // Larger than starfield
-  bgGeometry.scale(-1, 1, 1); // Invert the sphere so we see inside
-
-  // Create a basic material with a placeholder color
-  const bgMaterial = new THREE.MeshBasicMaterial({
-    color: 0x111122, // Dark blue as fallback
-    side: THREE.BackSide, // Render only the inside of the sphere
-    transparent: true,
-    opacity: 0.7,
-    depthWrite: false // Don't write to depth buffer to ensure it's always in the back
-  });
-
-  const background = new THREE.Mesh(bgGeometry, bgMaterial);
-  background.renderOrder = -1; // Render first, behind everything else
-  scene.add(background);
-
-  // Load the background image from the specified location
-  textureLoader.load('picture/background_battle.png', (texture) => {
-    // Ensure texture is properly configured for background use
+  textureLoader.load('picture/sky.jpg', (texture) => {
+    // Configure texture for skybox use
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
 
-    // Create new material with the loaded texture
-    const texturedMaterial = new THREE.MeshBasicMaterial({
+    // Create material with the loaded texture
+    const skyMaterial = new THREE.MeshBasicMaterial({
       map: texture,
       side: THREE.BackSide, // Render only the inside of the sphere
-      transparent: true,
-      opacity: 0.7,
-      depthWrite: false // Don't write to depth buffer
+      fog: false // Disable fog for the sky
     });
 
-    // Update the existing background mesh with the new material
-    background.material = texturedMaterial;
-    console.log('Background image loaded successfully');
-  }, (progress) => {
-    console.log('Background image loading progress:', progress);
-  }, (err) => {
-    console.warn('Could not load background image, using fallback color:', err);
-    // Keep the fallback colored background if image fails to load
+    const skySphere = new THREE.Mesh(skyGeometry, skyMaterial);
+    scene.add(skySphere);
+
+    // Ensure the sky renders first (behind everything else)
+    skySphere.renderOrder = -1;
+
+    // Store reference to sky for potential updates
+    scene.userData.skySphere = skySphere;
+
+    console.log('Sky texture loaded successfully');
+  }, undefined, (err) => {
+    console.warn('Could not load sky texture, using fallback color:', err);
+
+    // Fallback: Create a dark material for the sky (not affected by scene lighting)
+    const fallbackMaterial = new THREE.MeshBasicMaterial({
+      color: 0x1a1a2e, // Dark blue-purple color
+      side: THREE.BackSide, // Render only the inside of the sphere
+      fog: false // Disable fog for the sky
+    });
+
+    const skySphere = new THREE.Mesh(skyGeometry, fallbackMaterial);
+    scene.add(skySphere);
+
+    // Ensure the sky renders first (behind everything else)
+    skySphere.renderOrder = -1;
+
+    // Store reference to sky for potential updates
+    scene.userData.skySphere = skySphere;
   });
+}
+
+// Function to create a blood moon
+function createBloodMoon(scene) {
+  // Create moon geometry
+  const moonGeometry = new THREE.SphereGeometry(50, 32, 32);
+
+  // Load a texture for the blood moon
+  const textureLoader = new THREE.TextureLoader();
+  const moonTexture = textureLoader.load('picture/bloodmoon.png'); // Using existing background image
+
+  // Create a material for the blood moon with texture
+  const moonMaterial = new THREE.MeshStandardMaterial({
+    map: moonTexture, // Apply the texture
+    color: 0xff3300, // Tint the texture with red color
+    emissive: 0xff3300, // Make it emit red light
+    emissiveIntensity: 0.5,
+    roughness: 0.8,
+    metalness: 0.2
+  });
+
+  const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+
+  // Position the moon in the side-front of the scene (not behind the player)
+  moon.position.set(-200, 150, -100); // Position it to the left-front side of the player
+
+  scene.add(moon);
+
+  // Store reference to moon for animation updates
+  scene.userData.bloodMoon = moon;
+
+  // Add a point light to simulate the moon's glow affecting the scene
+  const moonLight = new THREE.PointLight(0xff4400, 0.7, 1500); // Reddish light with medium intensity
+  moonLight.position.copy(moon.position);
+  scene.add(moonLight);
+
+  // Store reference to moon light
+  scene.userData.moonLight = moonLight;
 }
 
 // Function to create distant environment (spherical arrangement)

@@ -106,15 +106,28 @@ export class HomingBullet extends BaseEnemyBullet {
 
   createMesh(options) {
     // 创建子弹主体
-    const geometry = new THREE.SphereGeometry(this.size, 8, 8);
+    const geometry = new THREE.SphereGeometry(this.size, 16, 12);
     const material = new THREE.MeshStandardMaterial({
       color: options.color || 0xff66ff,
       emissive: options.color || 0xff66ff,
-      emissiveIntensity: 0.5,
-      metalness: 0.3,
-      roughness: 0.4
+      emissiveIntensity: 0.8, // 增加发光强度
+      metalness: 0.1, // 降低金属度
+      roughness: 0.2, // 降低粗糙度
+      transparent: true,
+      opacity: 0.9
     });
     const bulletMesh = new THREE.Mesh(geometry, material);
+
+    // 添加一个发光的外壳效果
+    const glowGeometry = new THREE.SphereGeometry(this.size * 1.5, 8, 8);
+    const glowMaterial = new THREE.MeshBasicMaterial({
+      color: options.color || 0xff66ff,
+      transparent: true,
+      opacity: 0.3,
+      blending: THREE.AdditiveBlending
+    });
+    const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+    bulletMesh.add(glowMesh); // 发光外壳作为子对象
 
     // 创建拖曳线
     const trailGeometry = new THREE.BufferGeometry();
