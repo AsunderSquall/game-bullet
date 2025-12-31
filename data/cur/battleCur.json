@@ -1,10 +1,23 @@
 {
-  "name": "普通关卡",
-  "background": "0x000022",
+  "name": "精英关卡",
+  "background": "0x110011",
   "waves": [
     {
       "time": 1,
       "enemies": [
+        {
+          "type": "fairy_blue",
+          "position": {
+            "x": 0,
+            "y": 100,
+            "z": 300
+          },
+          "hp": 2600,
+          "options": {
+            "damage": 10,
+            "forwardSpeed": 8
+          }
+        },
         {
           "type": "fairy_red",
           "position": {
@@ -12,54 +25,54 @@
             "y": 100,
             "z": 200
           },
-          "hp": 2000,
+          "hp": 2600,
           "options": {
             "damage": 8,
             "forwardSpeed": 10
           }
         },
         {
-          "type": "wave_enemy",
-          "position": {
-            "x": 0,
-            "y": 100,
-            "z": 300
-          },
-          "hp": 1200,
-          "options": {
-            "damage": 10,
-            "forwardSpeed": 5
-          }
-        },
-        {
-          "type": "fairy_red",
+          "type": "spiral_enemy",
           "position": {
             "x": 0,
             "y": 100,
             "z": 400
           },
-          "hp": 2000,
+          "hp": 780,
           "options": {
-            "damage": 8,
-            "forwardSpeed": 10
+            "damage": 6,
+            "forwardSpeed": 4
           }
         }
       ]
     },
     {
-      "time": 15,
+      "time": 20,
       "enemies": [
         {
           "type": "tracker_enemy",
           "position": {
-            "x": 0,
+            "x": -50,
             "y": 100,
             "z": 400
           },
-          "hp": 1000,
+          "hp": 1300,
           "options": {
             "damage": 8,
             "forwardSpeed": 10
+          }
+        },
+        {
+          "type": "circle_enemy",
+          "position": {
+            "x": 50,
+            "y": 100,
+            "z": 400
+          },
+          "hp": 2080,
+          "options": {
+            "damage": 12,
+            "forwardSpeed": 6
           }
         }
       ]
@@ -67,7 +80,7 @@
   ],
   "rewards": {
     "cards": 3,
-    "gold": 100
+    "gold": 250
   },
-  "type": "normal"
+  "type": "elite"
 }

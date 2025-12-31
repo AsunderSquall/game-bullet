@@ -1,80 +1,71 @@
 {
-  "money": 300,
-  "health": null,
-  "bomb": 1,
+  "money": 1224,
+  "health": 100,
+  "bomb": 2,
   "currentPath": [
     "0-1",
-    "1-0",
-    "2-0",
-    "3-1",
-    "4-1"
+    "1-1",
+    "2-1",
+    "3-3",
+    "4-2",
+    "5-0"
   ],
   "deck": {
     "weapon001": 1,
-    "passive001": 3,
-    "passive002": 2,
-    "passive008": 1,
-    "passive005": 1,
-    "passive003": 1
+    "passive001": 2,
+    "passive002": 1,
+    "passive003": 2,
+    "passive004": 3,
+    "passive007": 1,
+    "passive006": 1,
+    "passive005": 1
   },
-  "max_passive_slots": 2,
-  "max_energy": 3,
+  "max_passive_slots": 4,
+  "max_energy": 5,
   "map": {
     "layers": [
       [
         {
           "id": "0-0",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 0
         },
         {
           "id": "0-1",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 1
         },
         {
           "id": "0-2",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 2
         },
         {
           "id": "0-3",
-          "type": "normal",
+          "type": "event",
           "layer": 0,
           "index": 3
-        },
-        {
-          "id": "0-4",
-          "type": "normal",
-          "layer": 0,
-          "index": 4
-        },
-        {
-          "id": "0-5",
-          "type": "normal",
-          "layer": 0,
-          "index": 5
         }
       ],
       [
         {
           "id": "1-0",
-          "type": "rest",
+          "type": "shop",
           "layer": 1,
           "index": 0
         },
         {
           "id": "1-1",
-          "type": "normal",
+          "type": "elite",
           "layer": 1,
           "index": 1
         },
         {
           "id": "1-2",
-          "type": "shop",
+          "type": "rest",
           "layer": 1,
           "index": 2
         }
@@ -82,19 +73,19 @@
       [
         {
           "id": "2-0",
-          "type": "event",
+          "type": "shop",
           "layer": 2,
           "index": 0
         },
         {
           "id": "2-1",
-          "type": "shop",
+          "type": "event",
           "layer": 2,
           "index": 1
         },
         {
           "id": "2-2",
-          "type": "elite",
+          "type": "rest",
           "layer": 2,
           "index": 2
         }
@@ -102,37 +93,37 @@
       [
         {
           "id": "3-0",
-          "type": "rest",
+          "type": "normal",
           "layer": 3,
           "index": 0
         },
         {
           "id": "3-1",
-          "type": "normal",
+          "type": "shop",
           "layer": 3,
           "index": 1
         },
         {
           "id": "3-2",
-          "type": "shop",
+          "type": "rest",
           "layer": 3,
           "index": 2
         },
         {
           "id": "3-3",
-          "type": "normal",
+          "type": "elite",
           "layer": 3,
           "index": 3
         },
         {
           "id": "3-4",
-          "type": "elite",
+          "type": "event",
           "layer": 3,
           "index": 4
         },
         {
           "id": "3-5",
-          "type": "normal",
+          "type": "elite",
           "layer": 3,
           "index": 5
         }
@@ -152,53 +143,53 @@
         },
         {
           "id": "4-2",
-          "type": "normal",
+          "type": "event",
           "layer": 4,
           "index": 2
         },
         {
           "id": "4-3",
-          "type": "rest",
+          "type": "normal",
           "layer": 4,
           "index": 3
+        },
+        {
+          "id": "4-4",
+          "type": "elite",
+          "layer": 4,
+          "index": 4
+        },
+        {
+          "id": "4-5",
+          "type": "normal",
+          "layer": 4,
+          "index": 5
         }
       ],
       [
         {
           "id": "5-0",
-          "type": "event",
+          "type": "elite",
           "layer": 5,
           "index": 0
         },
         {
           "id": "5-1",
-          "type": "elite",
+          "type": "normal",
           "layer": 5,
           "index": 1
         },
         {
           "id": "5-2",
-          "type": "normal",
+          "type": "event",
           "layer": 5,
           "index": 2
-        },
-        {
-          "id": "5-3",
-          "type": "elite",
-          "layer": 5,
-          "index": 3
-        },
-        {
-          "id": "5-4",
-          "type": "rest",
-          "layer": 5,
-          "index": 4
         }
       ],
       [
         {
           "id": "6-0",
-          "type": "rest",
+          "type": "normal",
           "layer": 6,
           "index": 0
         },
@@ -213,6 +204,24 @@
           "type": "normal",
           "layer": 6,
           "index": 2
+        },
+        {
+          "id": "6-3",
+          "type": "normal",
+          "layer": 6,
+          "index": 3
+        },
+        {
+          "id": "6-4",
+          "type": "rest",
+          "layer": 6,
+          "index": 4
+        },
+        {
+          "id": "6-5",
+          "type": "event",
+          "layer": 6,
+          "index": 5
         }
       ],
       [
@@ -233,24 +242,6 @@
           "type": "rest",
           "layer": 7,
           "index": 2
-        },
-        {
-          "id": "7-3",
-          "type": "rest",
-          "layer": 7,
-          "index": 3
-        },
-        {
-          "id": "7-4",
-          "type": "rest",
-          "layer": 7,
-          "index": 4
-        },
-        {
-          "id": "7-5",
-          "type": "rest",
-          "layer": 7,
-          "index": 5
         }
       ],
       [
@@ -268,8 +259,12 @@
         "to": "1-0"
       },
       {
+        "from": "0-0",
+        "to": "1-1"
+      },
+      {
         "from": "0-1",
-        "to": "1-0"
+        "to": "1-1"
       },
       {
         "from": "0-2",
@@ -280,11 +275,7 @@
         "to": "1-1"
       },
       {
-        "from": "0-4",
-        "to": "1-1"
-      },
-      {
-        "from": "0-5",
+        "from": "0-3",
         "to": "1-2"
       },
       {
@@ -340,112 +331,116 @@
         "to": "4-0"
       },
       {
+        "from": "3-0",
+        "to": "4-1"
+      },
+      {
         "from": "3-1",
-        "to": "4-0"
+        "to": "4-1"
       },
       {
         "from": "3-1",
-        "to": "4-1"
-      },
-      {
-        "from": "3-2",
-        "to": "4-1"
-      },
-      {
-        "from": "3-3",
-        "to": "4-1"
-      },
-      {
-        "from": "3-4",
-        "to": "4-1"
-      },
-      {
-        "from": "3-5",
         "to": "4-2"
       },
       {
-        "from": "3-5",
+        "from": "3-2",
+        "to": "4-2"
+      },
+      {
+        "from": "3-3",
+        "to": "4-2"
+      },
+      {
+        "from": "3-3",
         "to": "4-3"
+      },
+      {
+        "from": "3-4",
+        "to": "4-3"
+      },
+      {
+        "from": "3-4",
+        "to": "4-4"
+      },
+      {
+        "from": "3-5",
+        "to": "4-4"
+      },
+      {
+        "from": "3-5",
+        "to": "4-5"
       },
       {
         "from": "4-0",
         "to": "5-0"
       },
       {
-        "from": "4-0",
-        "to": "5-1"
-      },
-      {
         "from": "4-1",
-        "to": "5-1"
-      },
-      {
-        "from": "4-1",
-        "to": "5-2"
+        "to": "5-0"
       },
       {
         "from": "4-2",
+        "to": "5-0"
+      },
+      {
+        "from": "4-3",
+        "to": "5-1"
+      },
+      {
+        "from": "4-4",
+        "to": "5-1"
+      },
+      {
+        "from": "4-5",
         "to": "5-2"
-      },
-      {
-        "from": "4-2",
-        "to": "5-3"
-      },
-      {
-        "from": "4-3",
-        "to": "5-3"
-      },
-      {
-        "from": "4-3",
-        "to": "5-4"
       },
       {
         "from": "5-0",
         "to": "6-0"
       },
       {
+        "from": "5-0",
+        "to": "6-1"
+      },
+      {
         "from": "5-1",
-        "to": "6-0"
+        "to": "6-2"
+      },
+      {
+        "from": "5-1",
+        "to": "6-3"
       },
       {
         "from": "5-2",
-        "to": "6-1"
+        "to": "6-4"
       },
       {
-        "from": "5-3",
-        "to": "6-1"
-      },
-      {
-        "from": "5-3",
-        "to": "6-2"
-      },
-      {
-        "from": "5-4",
-        "to": "6-2"
+        "from": "5-2",
+        "to": "6-5"
       },
       {
         "from": "6-0",
         "to": "7-0"
       },
       {
-        "from": "6-0",
+        "from": "6-1",
+        "to": "7-0"
+      },
+      {
+        "from": "6-2",
+        "to": "7-0"
+      },
+      {
+        "from": "6-3",
         "to": "7-1"
       },
       {
-        "from": "6-1",
+        "from": "6-4",
         "to": "7-2"
       },
       {
-        "from": "6-1",
-        "to": "7-3"
-      },
-      {
-        "from": "6-2",
-        "to": "7-4"
-      },
-      {
-        "from": "6-2",
-        "to": "7-5"
+        "from": "6-5",
+        "to": "7-2"
       },
       {
         "from": "7-0",
@@ -458,20 +453,8 @@
       {
         "from": "7-2",
         "to": "8-0"
-      },
-      {
-        "from": "7-3",
-        "to": "8-0"
-      },
-      {
-        "from": "7-4",
-        "to": "8-0"
-      },
-      {
-        "from": "7-5",
-        "to": "8-0"
       }
     ]
   },
-  "currentStatus": "map"
+  "currentStatus": "battle"
 }
