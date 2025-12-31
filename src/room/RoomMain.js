@@ -157,9 +157,27 @@ export async function enterRoom(type) {
             break;
 
         case 'boss':
-            // 可以在此处定义 Boss 逻辑
-            roomData = { name: "最终Boss", background: "0x330000", waves: [] };
-            break;
+        roomData = {
+            name: "最终房间",
+            background: "0x000000",
+            waves: [
+                {
+                    time: 5,
+                    enemies: [
+                        {
+                            type: "boss",
+                            position: { x: 0, y: 250, z: 400 },
+                            hp: 100000 , // Boss 拥有极高血量
+                            options: {
+                                // 这里可以传入一些自定义的弹幕倍率
+                            }
+                        }
+                    ]
+                }
+            ],
+            type: 'boss'
+        };
+        break;
 
         default:
             roomData = { name: "未知房间", waves: [] };

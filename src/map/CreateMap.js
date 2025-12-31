@@ -12,7 +12,6 @@ export function createMap(layers = 8, minNodes = 3, maxNodes = 6) {
   const mapLayers = [];
   const connections = [];
 
-  // ---------- 生成普通层 ----------
   for (let layer = 0; layer < layers; layer++) {
     const numNodes =
       Math.floor(Math.random() * (maxNodes - minNodes + 1)) + minNodes;
@@ -21,15 +20,13 @@ export function createMap(layers = 8, minNodes = 3, maxNodes = 6) {
     for (let i = 0; i < numNodes; i++) {
       let type;
 
-      // 第 0 层：全部普通战斗
       if (layer === 0) {
         type = 'normal';
       }
-      // 倒数第二层：全部休息
       else if (layer === layers - 1) {
         type = 'rest';
       }
-      // 中间层：按概率
+
       else {
         type = pickWeightedType(MIDDLE_TYPE_WEIGHTS);
       }
@@ -54,7 +51,6 @@ export function createMap(layers = 8, minNodes = 3, maxNodes = 6) {
     }
   ]);
 
-  // ---------- 连线 ----------
   for (let layer = 0; layer < mapLayers.length - 1; layer++) {
     const current = mapLayers[layer];
     const next = mapLayers[layer + 1];
@@ -71,22 +67,15 @@ export function createMap(layers = 8, minNodes = 3, maxNodes = 6) {
   };
 }
 
-// =======================================================
-// 按权重随机选择房间类型
-// =======================================================
 function pickWeightedType(weights) {
   let r = Math.random();
   for (const { type, weight } of weights) {
     r -= weight;
     if (r <= 0) return type;
   }
-  // 理论上不会走到这里，兜底
   return weights[weights.length - 1].type;
 }
 
-// =======================================================
-// 连线核心逻辑（按你的规则）
-// =======================================================
 
 function biasedRandomHigh() {
   const r = Math.random();
@@ -106,14 +95,14 @@ function connectLayers(current, next, isBeforeBoss) {
   const U = current.length;
   const D = next.length;
 
-  // ---------- 1️⃣ 总连线数 ----------
+  // ---------- 1总连线数 ----------
   const minEdges = Math.max(U,D);
   const maxEdges = Math.min(D * 2, U * 2);
   const t = biasedRandomHigh();
   const totalEdges =
   minEdges + Math.floor(t * (maxEdges - minEdges + 1));
   
-  // ---------- 2️⃣ 哪些上层节点有 2 条 ----------
+  // ---------- 哪些上层节点有 2 条 ----------
   const twoCount = totalEdges - U;
 
   const upperIndices = [...Array(U).keys()];
@@ -121,7 +110,7 @@ function connectLayers(current, next, isBeforeBoss) {
 
   const twoEdgeSet = new Set(upperIndices.slice(0, twoCount));
 
-  // ---------- 3️⃣ 计算需要复用的次数 ----------
+  // ---------- 计算需要复用的次数 ----------
   const reuseCount = totalEdges - D;
 
   const twoEdgeIndices = [...Array(U - 1).keys()].map(i => i + 1);
@@ -130,7 +119,7 @@ function connectLayers(current, next, isBeforeBoss) {
 
   const reuseSet = new Set(twoEdgeIndices.slice(0, reuseCount));
 
-  // ---------- 4️⃣ 双指针连线 ----------
+  // ---------- 双指针连线 ----------
   let j = 0;
 
   for (let i = 0; i < U; i++) {
@@ -160,7 +149,7 @@ function connectLayers(current, next, isBeforeBoss) {
   return result;
 }
 
-// ---------- 工具：洗牌 ----------
+// ---------- 洗牌 ----------
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

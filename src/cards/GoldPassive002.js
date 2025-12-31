@@ -14,6 +14,6 @@ export class GoldPassive002 extends BaseCard {
   }
 
   apply(playerData) {
-    playerData.hitRadius -= 0.25;
+    playerData.hitRadius -= 0.35;
   }
 }

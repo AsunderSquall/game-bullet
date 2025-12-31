@@ -33,7 +33,7 @@ export class SingleLayerEvent {
 
     const selected = this.choices[choiceIndex];
     if (selected.effect) {
-      selected.effect(this.globalData);
+      await selected.effect(this.globalData);
     }
     this.globalData.currentStatus = 'map';
     await storage.save_global('global.json', this.globalData);

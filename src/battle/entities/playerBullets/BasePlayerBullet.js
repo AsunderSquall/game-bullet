@@ -75,7 +75,9 @@ export class BasePlayerBullet {
       if (!enemy || enemy.dead) continue;
 
       const dist = this.position.distanceTo(enemy.mesh.position);
-      const hitRadius = (enemy.mesh.geometry.parameters.radius || 2.5) + this.size;
+      const hitRadius = enemy.hitRadius || 
+                   enemy.mesh.geometry?.parameters?.radius || 
+                   2.5;
 
       if (dist < hitRadius) {
         if (!hitThisFrame) {

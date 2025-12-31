@@ -32,16 +32,16 @@
           }
         },
         {
-          "type": "spiral_enemy",
+          "type": "wave_enemy",
           "position": {
             "x": 0,
             "y": 100,
             "z": 400
           },
-          "hp": 600,
+          "hp": 1200,
           "options": {
-            "damage": 6,
-            "forwardSpeed": 4
+            "damage": 10,
+            "forwardSpeed": 5
           }
         }
       ]
@@ -50,16 +50,16 @@
       "time": 15,
       "enemies": [
         {
-          "type": "fairy_blue",
+          "type": "tracker_enemy",
           "position": {
             "x": 0,
             "y": 100,
             "z": 400
           },
-          "hp": 2000,
+          "hp": 1000,
           "options": {
-            "damage": 10,
-            "forwardSpeed": 8
+            "damage": 8,
+            "forwardSpeed": 10
           }
         }
       ]
