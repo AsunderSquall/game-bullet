@@ -1,6 +1,7 @@
 import { storage } from '../utils/storage.js';
 import { createCardFromId } from '../cards/CardFactory.js';
 import { Info } from '../ui/info.js';
+import { musicManager } from '../utils/musicManager.js';
 
 let currentGold = 0;
 let maxPassiveSlots = 8;
@@ -23,6 +24,10 @@ export async function ShopMain() {
     maxEnergy: document.getElementById('max-energy'),
     bomb: document.getElementById('current-bombs')
   };
+
+  // Play shop music (using map music)
+  musicManager.stop(); // Stop any current music
+  musicManager.play('map', true);
 
   await init();
 }
@@ -129,6 +134,11 @@ async function init() {
         tempGlobalData.currentStatus = 'map';
         await storage.save_global('global.json', tempGlobalData);
         await Info.alert('存档已保存', '成功');
+
+        // Play map music when returning to map
+        musicManager.stop(); // Stop shop music
+        musicManager.play('map', true);
+
         // 跳转逻辑...
         import('../map/MapMain.js').then(m => m.showMap());
       } catch (err) {

@@ -14,7 +14,7 @@ export class HomingKnife extends BasePlayerBullet {
 
     this.enemies = enemies;
     this.target = null;
-    this.searchRadius = 50; 
+    this.searchRadius = 500; 
     this.findNearestEnemy(); 
     this.velocity = new THREE.Vector3(0, 0, this.speed);
 
@@ -85,7 +85,7 @@ export class HomingKnife extends BasePlayerBullet {
         .subVectors(this.target.mesh.position, this.mesh.position)
         .normalize();
 
-      const maxTurnAnglePerFrame = 0.5 * Math.PI / 180;  // 0.8° ≈ 0.014 弧度
+      const maxTurnAnglePerFrame = 2.5 * Math.PI / 180;  // 0.8° ≈ 0.014 弧度
 
       // 计算当前方向到目标方向的角度差
       const angleDiff = this.velocity.clone().normalize().angleTo(toTarget);

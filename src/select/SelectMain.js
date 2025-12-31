@@ -2,6 +2,7 @@ import { storage } from '../utils/storage.js';
 import { tempPlayerDefault } from '../defaults/tempPlayerDefault.js';
 import { createCardFromId } from '../cards/CardFactory.js';
 import { Battle } from '../battle/battle.js';
+import { musicManager } from '../utils/musicManager.js';
 
 // 临时全局数据（内存操作）
 let tempGlobalData = null;
@@ -53,6 +54,10 @@ export async function SelectMain() {
     console.error('元素没找到！');
     return;
   }
+
+  // Play select music
+  musicManager.stop(); // Stop any current music
+  musicManager.play('select', true);
 
   await init();
 }
@@ -116,7 +121,7 @@ async function init() {
 
       attackPower: computed.attackPower ?? 28,
       attackSpeed: computed.attackSpeed ?? 0.09,
-      bulletType: currentWeaponCard?.name || "sakuya_knife_normal",
+      bulletType: currentWeaponCard.bulletType || "sakuya_knife",
 
       position: { x: 0, y: 250, z: 0 },
 
@@ -136,6 +141,11 @@ async function init() {
       tempGlobalData.currentStatus = 'battle';
 
       await storage.save_global('global.json', tempGlobalData);
+
+      // Stop current music before starting battle
+      musicManager.stop();
+      musicManager.play('battle', true);
+
       const game = new Battle();
       await game.start('battleCur.json');
     } catch (err) {

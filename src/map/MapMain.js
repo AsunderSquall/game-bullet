@@ -1,6 +1,7 @@
 // src/map/MapMain.js
 import { storage } from '../utils/storage.js';
 import { enterRoom } from '../room/RoomMain.js';  // ⭐ 统一房间入口，不要直接跳页面！
+import { musicManager } from '../utils/musicManager.js';
 
 const NODE_ICONS = {
   normal: '⚔️',
@@ -41,7 +42,20 @@ export async function showMap() {
     };
   }
 
+  // Play map music
+  musicManager.stop(); // Stop any current music
+  musicManager.play('map', true);
+
   await renderMap();
+
+  // Check if boss was defeated and show credit screen after a short delay
+  const globalData = await storage.load_global('global.json');
+  if (globalData?.bossDefeated) {
+    // Show credit screen after a short delay
+    setTimeout(() => {
+      showCreditScreen();
+    }, 500); // 0.5秒延迟
+  }
 }
 
 async function renderMap() {
@@ -181,6 +195,167 @@ async function selectNode(node) {
 
   await renderMap();
   await enterRoom(node.type);
+}
+
+// 显示信用/结算画面
+async function showCreditScreen() {
+  // 停止当前音乐并播放结算音乐
+  musicManager.stop();
+  musicManager.play('credit', true);
+
+  // 创建覆盖层
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('picture/credit.png') center/cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+  `;
+
+  // 创建内容容器
+  const container = document.createElement('div');
+  container.style.cssText = `
+    text-align: center;
+    max-width: 800px;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 0 50px rgba(0, 150, 255, 0.5);
+    border: 2px solid #00a8ff;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  `;
+
+  // 添加装饰元素
+  const decoration = document.createElement('div');
+  decoration.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0, 150, 255, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0, 200, 150, 0.1) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: -1;
+  `;
+  container.appendChild(decoration);
+
+  // 添加标题
+  const title = document.createElement('h1');
+  title.textContent = '恭喜通关！';
+  title.style.cssText = `
+    font-size: 48px;
+    color: #00a8ff;
+    margin: 0 0 20px 0;
+    text-shadow: 0 0 10px rgba(0, 168, 255, 0.7);
+    letter-spacing: 3px;
+    font-weight: bold;
+  `;
+
+  // 添加角色图片
+  const characterImage = document.createElement('img');
+  characterImage.src = 'models/sakuya-plushie/thumbnail.jpg';
+  characterImage.style.cssText = `
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 2px solid #00a8ff;
+    box-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+  `;
+  characterImage.alt = 'Character Image';
+
+  // 添加感谢信息
+  const thanks = document.createElement('div');
+  thanks.innerHTML = `
+    <p style="color: #e6e6e6; font-size: 20px; margin: 20px 0; line-height: 1.6;">
+      感谢您游玩我们的游戏！<br>
+      您的冒险精神令人钦佩！
+    </p>
+  `;
+
+  // 添加按钮容器
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = `
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  `;
+
+  // 返回地图按钮
+  const mapButton = document.createElement('button');
+  mapButton.textContent = '返回地图';
+  mapButton.style.cssText = `
+    padding: 15px 30px;
+    font-size: 18px;
+    background: linear-gradient(to bottom, #00a8ff, #0077b6);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    min-width: 150px;
+  `;
+  mapButton.onclick = () => {
+    document.body.removeChild(overlay);
+    // 重新显示地图
+    showMap();
+  };
+
+  // 返回主菜单按钮
+  const menuButton = document.createElement('button');
+  menuButton.textContent = '主菜单';
+  menuButton.style.cssText = `
+    padding: 15px 30px;
+    font-size: 18px;
+    background: linear-gradient(to bottom, #9c89b8, #7f63a1);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    min-width: 150px;
+  `;
+  menuButton.onclick = () => {
+    document.body.removeChild(overlay);
+    window.location.href = 'index.html';
+  };
+
+  buttonContainer.appendChild(mapButton);
+  buttonContainer.appendChild(menuButton);
+
+  // 添加到容器
+  container.appendChild(title);
+  container.appendChild(characterImage);
+  container.appendChild(thanks);
+  container.appendChild(buttonContainer);
+  overlay.appendChild(container);
+  document.body.appendChild(overlay);
+
+  // 添加进入动画
+  container.style.opacity = '0';
+  container.style.transform = 'scale(0.8)';
+  setTimeout(() => {
+    container.style.transition = 'all 0.8s ease';
+    container.style.opacity = '1';
+    container.style.transform = 'scale(1)';
+  }, 50);
 }
 
 window.addEventListener('resize', async () => {

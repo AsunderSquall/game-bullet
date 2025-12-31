@@ -5,7 +5,8 @@ import * as THREE from 'three';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { storage } from '../../utils/storage.js';
-import { currentPlayer } from '../battle.js'
+import { currentPlayer } from '../battle.js';
+import { musicManager } from '../../utils/musicManager.js';
 
 export const keys = { w: false, a: false, s: false, d: false, shift: false };
 export let scrollSpeed = 0;
@@ -66,6 +67,10 @@ export class Player {
     this.health = data.health;
     this.maxHealth = data.maxHealth;
     this.invulnerableUntil = 0;
+
+    // 添加伤害音效相关属性
+    this.lastDamageTime = 0;
+    this.damageCooldown = 1.0; // 1秒伤害冷却时间
 
     this.hitRadius = data.hitRadius;
     this.hitOffset = new THREE.Vector3(0, data.hitOffsetY, 0);
@@ -146,9 +151,17 @@ export class Player {
       console.log("take damage,无敌");
       return;
     }
+
     this.health -= amount;
     console.log("take damage,health=",this.health);
     storage.set('playerCur.json', { ...this.data, health: this.health });
+
+    // 检查是否在伤害冷却时间内
+    if (now - this.lastDamageTime >= this.damageCooldown) {
+      this.lastDamageTime = now;
+      // 播放随机射击音效（伤害音效），音量调低
+      this.playDamageSound();
+    }
 
     if (this.health <= 0) {
       if (this.data.totem > 0) {
@@ -162,6 +175,23 @@ export class Player {
       console.log("玩家死亡");
     }
     this.invulnerableUntil = now + 1;
+  }
+
+  playDamageSound() {
+    // 创建一个临时音频实例用于播放伤害音效
+    // 随机选择一个射击音效
+    const musicList = musicManager.musicLibrary.shoot || [];
+    if (musicList.length === 0) return;
+
+    const randomMusic = musicList[Math.floor(Math.random() * musicList.length)];
+    const musicPath = `music/${randomMusic}`;
+
+    const damageAudio = new Audio(musicPath);
+    // 将音量调低（例如30%）
+    damageAudio.volume = musicManager.volume * 0.3;
+    damageAudio.play().catch(e => {
+      console.warn('Damage sound play failed:', e);
+    });
   }
 
   update(delta) {

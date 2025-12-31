@@ -8,6 +8,7 @@ import { EnemyFactory } from './entities/EnemyFactory.js';
 import { storage } from '../utils/storage.js';
 import { updateHUD } from '../ui/hud.js';
 import { RandomBattleGenerator } from './utils/randomBattleGenerator.js';
+import { musicManager } from '../utils/musicManager.js';
 import { createCardFromId } from '../cards/CardFactory.js';
 
 export let currentPlayer = null;
@@ -38,10 +39,14 @@ export class Battle {
     this.gameRunning = true; // 标记游戏是否正在运行
     this.handleResize = null; // 保存resize事件处理器引用
     this.difficulty = 'normal'; // 默认难度
+    this.celebrateSoundPlayed = false; // 标记庆祝音效是否已播放
   }
 
   async start(battleFile = 'battleCur.json') {
     console.log('启动');
+
+    // 重置庆祝音效播放标志
+    this.celebrateSoundPlayed = false;
 
     this.scene = createScene();
     // ★ 关键修改：多传 this.enemyBullets 给 createPlayer
@@ -180,7 +185,7 @@ export class Battle {
 
   // 检查是否满足通关条件
   checkWinCondition() {
-    // this.onWin();
+    this.onWin();
     // return;
     // 只有在所有波次的敌人都已生成后，才检查通关条件
     if (this.allWavesSpawned) {
@@ -199,8 +204,25 @@ export class Battle {
   }
 
   // 通关时调用的函数
-  onWin() {
+  async onWin() {
     console.log("恭喜通关！");
+
+    try {
+      // 检查是否是boss战，只有boss战才设置击败标志
+      const battleData = await storage.load('battleCur.json');
+      const isBossBattle = battleData && battleData.type === "boss";
+
+      if (isBossBattle) {
+        // 设置boss击败标志，以便在地图界面显示信用画面
+        const globalData = await storage.load_global('global.json');
+        globalData.bossDefeated = true;
+        await storage.save_global('global.json', globalData);
+      }
+    } catch (error) {
+      console.warn("无法加载战斗数据，将作为普通战斗处理:", error);
+      // 如果无法加载战斗数据，继续执行而不设置boss标志
+    }
+
     this.showVictoryScreen();
   }
 
@@ -242,6 +264,9 @@ export class Battle {
 
     // 停止游戏运行
     this.gameRunning = false;
+
+    // Play death music (non-looping)
+    musicManager.playDeathMusic();
 
     // 保存玩家死亡状态到全局数据
     if (this.player && this.player.data) {
@@ -504,6 +529,17 @@ async showVictoryScreen() {
 
     await storage.save_global('global.json', globalData);
 
+    // 播放庆祝音效（所有战斗胜利时都播放，只播放一次）
+    if (!this.celebrateSoundPlayed) {
+      musicManager.stop(); // 停止当前音乐
+      this.celebrateAudio = new Audio('music/celebrate.ogg');
+      this.celebrateAudio.volume = musicManager.volume;
+      this.celebrateAudio.play().catch(e => {
+        console.warn('Celebrate sound play failed:', e);
+      });
+      this.celebrateSoundPlayed = true; // 标记庆祝音效已播放
+    }
+
     // --- 5. UI 构建 (包含额外奖励展示) ---
     const fontLink = document.createElement('link');
     fontLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap';
@@ -548,7 +584,15 @@ async showVictoryScreen() {
 
     confirmButton.onmouseover = () => { confirmButton.style.background = '#00d4ff'; confirmButton.style.color = '#000'; };
     confirmButton.onmouseout = () => { confirmButton.style.background = 'transparent'; confirmButton.style.color = '#00d4ff'; };
-    confirmButton.onclick = () => { document.body.removeChild(overlay); this.goToMapScreen(); };
+    confirmButton.onclick = () => {
+      // 停止庆祝音效
+      if (this.celebrateAudio) {
+        this.celebrateAudio.pause();
+        this.celebrateAudio = null;
+      }
+      document.body.removeChild(overlay);
+      this.goToMapScreen();
+    };
 
     container.appendChild(title);
     container.appendChild(subtitle);
@@ -578,6 +622,10 @@ async showVictoryScreen() {
       }
     }
     this.cleanupBattleScene();
+
+    // Play map music when going to map
+    musicManager.stop(); // Stop any current music (like death music)
+    musicManager.play('map', true);
 
     const { showMap } = await import('../map/MapMain.js');
     await showMap();

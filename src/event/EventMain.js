@@ -1,6 +1,7 @@
 // src/ui/EventMain.js
 import { storage } from '../utils/storage.js';
 import { EventFactory } from './EventFactory.js';
+import { musicManager } from '../utils/musicManager.js';
 
 let currentEvent = null;
 let tempGlobalData = null;
@@ -27,6 +28,10 @@ export async function EventMain() {
   document.open();
   document.write(htmlContent);
   document.close();
+
+  // Play event music
+  musicManager.stop(); // Stop any current music
+  musicManager.play('event', true);
 
   // 【关键修复】直接在这里初始化，不用等 window.onload！
   // 因为 document.close() 后新页面已经解析完毕，可以安全访问DOM了～
@@ -105,10 +110,14 @@ export async function EventMain() {
   };
 
   currentEvent.onEventEnd = async () => {
-    
+
     tempGlobalData = await storage.load_global('global.json');
     tempGlobalData.currentStatus = 'map';
     await storage.save_global('global.json', tempGlobalData);
+
+    // Play map music when returning to map
+    musicManager.stop(); // Stop event music
+    musicManager.play('map', true);
 
     // 动态导入地图模块并显示
     import('../map/MapMain.js')

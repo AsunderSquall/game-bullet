@@ -4,22 +4,22 @@
   "shopItems": [
     {
       "id": "weapon003",
-      "price": 132
+      "price": 127
     },
     {
-      "id": "passive006",
-      "price": 64
+      "id": "passive002",
+      "price": 74
     },
     {
-      "id": "passive008",
-      "price": 60
+      "id": "passive007",
+      "price": 75
     },
     {
-      "id": "passive004",
-      "price": 71
+      "id": "passive007",
+      "price": 63
     }
   ],
-  "EnergyPrice": 92,
-  "PostsPrice": 100,
-  "BombPrice": 105
+  "EnergyPrice": 109,
+  "PostsPrice": 91,
+  "BombPrice": 109
 }

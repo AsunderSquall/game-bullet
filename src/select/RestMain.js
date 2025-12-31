@@ -1,5 +1,6 @@
 // RestMain.js —— 休息界面主逻辑
 import { storage } from '../utils/storage.js';
+import { musicManager } from '../utils/musicManager.js';
 
 let currentHealth = 60;
 let maxHealth = 100;
@@ -10,6 +11,10 @@ export async function showRest() {
   const response = await fetch('src/ui/rest.html');
   if (!response.ok) throw new Error('加载休息HTML失败～');
   document.body.innerHTML = await response.text();
+
+  // Play rest music (random from rest category, looped)
+  musicManager.stop(); // Stop any current music
+  musicManager.play('rest', true);
 
   // 加载玩家当前数据
   const playerData = await storage.load_global('global.json');
@@ -39,6 +44,10 @@ export async function showRest() {
     globalData.health = currentHealth;
     globalData.currentStatus = 'map';
     await storage.save_global('global.json', globalData);
+
+    // Play map music when returning to map
+    musicManager.stop(); // Stop rest music
+    musicManager.play('map', true);
 
     // 跳转到地图界面
     import('../map/MapMain.js').then(({ showMap }) => {

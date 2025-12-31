@@ -7,6 +7,7 @@ import { ShopMain } from './shop/ShopMain.js';
 import { Battle } from './battle/battle.js';
 import { showRest } from './select/RestMain.js';
 import { EventMain } from './event/EventMain.js';
+import { musicManager } from './utils/musicManager.js';
 
 console.log('✨ 猫娘来啦～欢迎主人进入弹幕冒险世界！');
 
@@ -32,6 +33,18 @@ async function main() {
     console.error('开始界面元素没找到！');
     return;
   }
+
+  // Play main menu music
+  musicManager.play('main', true);
+
+  // Add event listeners to resume music if autoplay was blocked
+  document.addEventListener('click', function() {
+    musicManager.resumePendingPlay();
+  }, { once: true });
+
+  document.addEventListener('keydown', function() {
+    musicManager.resumePendingPlay();
+  }, { once: true });
 
   await init();
 }
@@ -68,6 +81,7 @@ async function startNewGame() {
 
   globalData.map = newMap;
   globalData.currentPath = [];
+  globalData.bossDefeated = false; // 重置boss击败标志
 
   await storage.save_global('global.json', globalData);
 
@@ -107,20 +121,48 @@ async function continueGame() {
 
   // 检查玩家是否已死亡
   if (globalData.isPlayerDead) {
+    musicManager.stop(); // Stop current music
+    musicManager.play('map', true); // Play map music when returning to map after death
     await showMap(); // 如果玩家死亡，直接返回地图
     return;
   }
 
-  if (globalData.currentStatus === 'select') await SelectMain();
-  else if (globalData.currentStatus === 'shop') await ShopMain();
-  else if (globalData.currentStatus === 'map') await showMap();
-  else if (globalData.currentStatus === 'rest') await showRest();
-  else if (globalData.currentStatus === 'event') await EventMain();
+  if (globalData.currentStatus === 'select') {
+    musicManager.stop(); // Stop current music
+    musicManager.play('select', true);
+    await SelectMain();
+  }
+  else if (globalData.currentStatus === 'shop') {
+    musicManager.stop(); // Stop current music
+    musicManager.play('map', true); // Shop uses map music
+    await ShopMain();
+  }
+  else if (globalData.currentStatus === 'map') {
+    musicManager.stop(); // Stop current music
+    musicManager.play('map', true);
+    await showMap();
+  }
+  else if (globalData.currentStatus === 'rest') {
+    musicManager.stop(); // Stop current music
+    musicManager.play('map', true); // Rest uses map music
+    await showRest();
+  }
+  else if (globalData.currentStatus === 'event') {
+    musicManager.stop(); // Stop current music
+    musicManager.play('event', true);
+    await EventMain();
+  }
   else if (globalData.currentStatus === 'battle') {
+    musicManager.stop(); // Stop current music
+    musicManager.play('battle', true);
     const game = new Battle();
     await game.start('battleCur.json');
   }
-  else await showMap(); // 默认加载地图
+  else {
+    musicManager.stop(); // Stop current music
+    musicManager.play('map', true); // 默认加载地图
+    await showMap();
+  }
 }
 
 function openSettings() {
