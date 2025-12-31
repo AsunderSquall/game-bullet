@@ -10,6 +10,10 @@ import { updateHUD } from '../ui/hud.js';
 import { RandomBattleGenerator } from './utils/randomBattleGenerator.js';
 import { musicManager } from '../utils/musicManager.js';
 import { createCardFromId } from '../cards/CardFactory.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js';
 
 export let currentPlayer = null;
 
@@ -40,6 +44,18 @@ export class Battle {
     this.handleResize = null; // 保存resize事件处理器引用
     this.difficulty = 'normal'; // 默认难度
     this.celebrateSoundPlayed = false; // 标记庆祝音效是否已播放
+
+    // 后处理效果相关
+    this.composer = null;
+    this.renderPass = null;
+    this.blurPass = null;
+    this.copyPass = null;
+
+    // 动态模糊参数
+    this.dynamicBlurEnabled = true;
+    this.baseBlurAmount = 0.0;
+    this.maxBlurAmount = 0.03;  // 增加最大模糊量以获得更明显的效果
+    this.blurSpeed = 0.05;
   }
 
   async start(battleFile = 'battleCur.json') {
@@ -66,6 +82,9 @@ export class Battle {
 
     setupControls(this.renderer.domElement);
 
+    // 初始化后处理效果
+    this.initPostProcessing();
+
     // 检查是否需要生成随机关卡
     let battleData;
     if (battleFile === 'random') {
@@ -91,6 +110,65 @@ export class Battle {
     this.setupResize();
   }
 
+  initPostProcessing() {
+    // 创建 EffectComposer
+    this.composer = new EffectComposer(this.renderer);
+
+    // 创建渲染通道
+    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(this.renderPass);
+
+    // 创建动态模糊着色器
+    const dynamicBlurShader = {
+      uniforms: {
+        "tDiffuse": { value: null },
+        "amount": { value: 0.0 },
+        "direction": { value: new THREE.Vector2(0, 0) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D tDiffuse;
+        uniform float amount;
+        uniform vec2 direction;
+        varying vec2 vUv;
+
+        void main() {
+          vec4 sum = vec4(0.0);
+          vec2 inc = direction * amount * 0.01;
+
+          sum += texture2D(tDiffuse, vUv - 4.0 * inc) * 0.05;
+          sum += texture2D(tDiffuse, vUv - 3.0 * inc) * 0.09;
+          sum += texture2D(tDiffuse, vUv - 2.0 * inc) * 0.12;
+          sum += texture2D(tDiffuse, vUv - inc) * 0.15;
+          sum += texture2D(tDiffuse, vUv) * 0.16;
+          sum += texture2D(tDiffuse, vUv + inc) * 0.15;
+          sum += texture2D(tDiffuse, vUv + 2.0 * inc) * 0.12;
+          sum += texture2D(tDiffuse, vUv + 3.0 * inc) * 0.09;
+          sum += texture2D(tDiffuse, vUv + 4.0 * inc) * 0.05;
+
+          gl_FragColor = sum;
+        }
+      `
+    };
+
+    // 创建模糊通道
+    this.blurPass = new ShaderPass(dynamicBlurShader);
+    this.composer.addPass(this.blurPass);
+
+    // 添加复制通道作为最终输出
+    this.copyPass = new ShaderPass(CopyShader);
+    this.composer.addPass(this.copyPass);
+
+    // 确保最后一个通道渲染到屏幕
+    this.copyPass.renderToScreen = true;
+  }
+
   animate = () => {
     if (!this.gameRunning) return; // 如果游戏未运行，则停止动画循环
 
@@ -114,10 +192,62 @@ export class Battle {
     this.updateBackground(delta); // Update the dynamic background
     updateHUD(currentPlayer);
 
-    this.renderer.render(this.scene, this.camera);
+    // 更新动态模糊效果
+    this.updateDynamicBlur(delta);
+
+    // 使用 EffectComposer 渲染场景
+    this.composer.render();
   };
 
   updatePlayer(delta) { this.player.update(delta); }
+
+  updateDynamicBlur(delta) {
+    if (!this.dynamicBlurEnabled) return;
+
+    let blurAmount = 0;
+    let blurDirection = new THREE.Vector2(0, 0); // 默认无方向
+
+    if (this.camera && this.player && this.player.object) {
+      // 使用相机位置来计算移动速度，因为相机跟随玩家
+      if (!this.previousCameraPosition) {
+        this.previousCameraPosition = this.camera.position.clone();
+        this.previousCameraTime = performance.now();
+      } else {
+        const currentTime = performance.now();
+        const deltaTime = (currentTime - this.previousCameraTime) / 1000; // 转换为秒
+        const currentCameraPos = this.camera.position.clone();
+        const displacement = new THREE.Vector3().subVectors(currentCameraPos, this.previousCameraPosition);
+        const distance = displacement.length();
+
+        // 计算速度（单位：单位/秒）
+        const speed = deltaTime > 0 ? distance / deltaTime : 0;
+
+        // 使用更大的系数来获得更明显的模糊效果
+        blurAmount = Math.min(speed * 0.001, this.maxBlurAmount); // 调整系数以获得更好的效果
+
+        // 计算模糊方向（如果移动距离足够大）
+        if (distance > 0.001) { // 避免除以接近零的值
+          const direction = displacement.normalize();
+          // 将3D方向向量转换为屏幕空间方向（简化处理）
+          blurDirection.set(direction.x, direction.y);
+        }
+
+        // 更新上一个位置和时间
+        this.previousCameraPosition.copy(currentCameraPos);
+        this.previousCameraTime = currentTime;
+      }
+    }
+
+    // 更新模糊着色器的参数
+    if (this.blurPass && this.blurPass.uniforms) {
+      if (this.blurPass.uniforms.amount) {
+        this.blurPass.uniforms.amount.value = blurAmount;
+      }
+      if (this.blurPass.uniforms.direction) {
+        this.blurPass.uniforms.direction.value = blurDirection;
+      }
+    }
+  }
 
   updateWaves() {
     while (this.currentWaveIndex < this.waves.length && this.time >= this.waves[this.currentWaveIndex].time) {
@@ -185,7 +315,7 @@ export class Battle {
 
   // 检查是否满足通关条件
   checkWinCondition() {
-    this.onWin();
+    // this.onWin();
     // return;
     // 只有在所有波次的敌人都已生成后，才检查通关条件
     if (this.allWavesSpawned) {
@@ -638,6 +768,13 @@ async showVictoryScreen() {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
     }
 
+    // 清理后处理效果
+    if (this.composer) {
+      this.composer.renderPass = null;
+      this.composer.passes = [];
+      this.composer = null;
+    }
+
     // 清理事件监听器
     if (this.handleResize) {
       window.removeEventListener('resize', this.handleResize);
@@ -746,6 +883,11 @@ async showVictoryScreen() {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+      // 更新 EffectComposer 大小
+      if (this.composer) {
+        this.composer.setSize(window.innerWidth, window.innerHeight);
+      }
     };
     window.addEventListener('resize', this.handleResize);
   }
