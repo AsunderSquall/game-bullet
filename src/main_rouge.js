@@ -104,6 +104,13 @@ async function continueGame() {
   console.log('加载存档中！');
   document.body.innerHTML = '';
   const globalData = await storage.load_global('global.json');
+
+  // 检查玩家是否已死亡
+  if (globalData.isPlayerDead) {
+    await showMap(); // 如果玩家死亡，直接返回地图
+    return;
+  }
+
   if (globalData.currentStatus === 'select') await SelectMain();
   else if (globalData.currentStatus === 'shop') await ShopMain();
   else if (globalData.currentStatus === 'map') await showMap();

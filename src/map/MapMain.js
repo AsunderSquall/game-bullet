@@ -32,6 +32,15 @@ export async function showMap() {
     return;
   }
 
+  // Add event listener for the main menu button
+  const mainMenuBtn = document.getElementById('main-menu-btn');
+  if (mainMenuBtn) {
+    mainMenuBtn.onclick = () => {
+      // Redirect to main menu (assuming index.html is the main menu)
+      window.location.href = 'index.html';
+    };
+  }
+
   await renderMap();
 }
 
@@ -39,6 +48,7 @@ async function renderMap() {
   const globalData = await storage.load_global('global.json');
   const mapData = globalData?.map;
   const currentPath = globalData?.currentPath || [];
+  const isPlayerDead = globalData?.isPlayerDead || false; // 检查玩家是否死亡
 
   if (!mapData || !mapData.layers) {
     document.body.innerHTML += '<p style="color:orange;text-align:center;">还没有地图哦～快去开始新游戏生成一张吧！</p>';
@@ -50,7 +60,7 @@ async function renderMap() {
 
   // 每层垂直间距，可以自行调整
   const layerVerticalOffset = 120;
-  const layerTopBase = 60;
+  const layerTopBase = 100; // Increased from 60 to 100 to make room for the button
 
   mapData.layers.forEach((layer, layerIndex) => {
     const layerDiv = document.createElement('div');
@@ -87,12 +97,33 @@ async function renderMap() {
         nodeDiv.classList.add('visited');
       }
 
-      // 可点击判断
-      if (isNodeReachable(node, currentPath, mapData)) {
-        nodeDiv.classList.add('clickable');
-        nodeDiv.onclick = () => selectNode(node);
+      // 如果玩家死亡，根据节点是否已通关设置样式
+      if (isPlayerDead) {
+        // 检查该节点是否在已访问路径中（已通关）
+        if (currentPath.includes(node.id)) {
+          // 已通关的节点 - 暗红色边框
+          nodeDiv.classList.add('completed-dead');
+          nodeDiv.classList.remove('clickable');
+          nodeDiv.onclick = null; // 移除点击事件
+        } else {
+          // 未通关但已解锁的节点 - 红色边框
+          if (isNodeReachable(node, currentPath, mapData)) {
+            nodeDiv.classList.add('unreachable');
+            nodeDiv.classList.remove('clickable');
+            nodeDiv.onclick = null; // 移除点击事件
+          } else {
+            // 未解锁的节点 - 保持原样
+            nodeDiv.classList.add('locked');
+          }
+        }
       } else {
-        nodeDiv.classList.add('locked');
+        // 玩家未死亡，正常逻辑
+        if (isNodeReachable(node, currentPath, mapData)) {
+          nodeDiv.classList.add('clickable');
+          nodeDiv.onclick = () => selectNode(node);
+        } else {
+          nodeDiv.classList.add('locked');
+        }
       }
 
       layerDiv.appendChild(nodeDiv);

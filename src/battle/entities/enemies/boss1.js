@@ -9,7 +9,7 @@ export class GalacticBoss extends Enemy {
             hp: options.hp || 20000,
             ...options
         });
-        
+
         this.hitRadius = options.hitRadius || 12;
         this.stateTimer = 0;
         this.attackPhase = 0;
@@ -18,19 +18,19 @@ export class GalacticBoss extends Enemy {
         this.lastShootTime = 0;
         this.shootIntervals = {
             spiral: 0.12,
-            star: 0.30,     
-            nebula: 0.06    
+            star: 0.30,
+            nebula: 0.06
         };
     }
 
     createMesh() {
         const group = new THREE.Group();
         const coreGeo = new THREE.IcosahedronGeometry(8, 2);
-        const coreMat = new THREE.MeshStandardMaterial({ 
-            color: 0xff00ff, 
+        const coreMat = new THREE.MeshStandardMaterial({
+            color: 0xff00ff,
             emissive: 0xff00ff,
             emissiveIntensity: 2,
-            wireframe: true 
+            wireframe: true
         });
         this.coreMesh = new THREE.Mesh(coreGeo, coreMat);
         group.add(this.coreMesh);
@@ -51,7 +51,9 @@ export class GalacticBoss extends Enemy {
     update(delta, globalTime) {
         if (this.dead) return;
 
-        this.mesh.position.y += Math.sin(globalTime * 2) * 0.15;
+        this.mesh.position.x += Math.sin(globalTime * 1.5) * 1.0 + Math.cos(globalTime * 2.7) * 1.2 + Math.sin(globalTime * 4) * 1.2;
+        this.mesh.position.y += Math.cos(globalTime * 0.8) * 0.5 + Math.sin(globalTime * 2.4) * 0.5 + Math.sin(globalTime * 3.3) * 1.8;
+        
         this.ring1.rotation.z += delta * 2.0;
         this.ring2.rotation.y += delta * 1.5;
         this.coreMesh.rotation.y -= delta * 0.8;
@@ -59,19 +61,19 @@ export class GalacticBoss extends Enemy {
         this.stateTimer += delta;
 
         switch (this.attackPhase) {
-            case 0: 
+            case 0:
                 if (this.canShoot('spiral')) this.shootSpiralPetals();
                 if (this.stateTimer > 5) this.nextPhase();
                 break;
-            case 1: 
+            case 1:
                 this.coreMesh.material.emissiveIntensity = 5 + Math.sin(globalTime * 10) * 5;
                 if (this.stateTimer > 1.5) this.nextPhase();
                 break;
-            case 2: 
+            case 2:
                 if (this.canShoot('star')) this.shootMovingStar();
                 if (this.stateTimer > 6) this.nextPhase();
                 break;
-            case 3: 
+            case 3:
                 if (this.canShoot('nebula')) this.shootNebula(globalTime);
                 if (this.stateTimer > 5) {
                     this.attackPhase = 0;
@@ -103,7 +105,7 @@ export class GalacticBoss extends Enemy {
             const angle = this.patternAngle + (i * Math.PI * 2) / arms;
             const dir = new THREE.Vector3(
                 Math.cos(angle) * 0.3, // 减小XY扩散比例
-                Math.sin(angle) * 0.3, 
+                Math.sin(angle) * 0.3,
                 -4.0
             ).normalize();
 
@@ -138,8 +140,8 @@ export class GalacticBoss extends Enemy {
         const count = 16;
         for (let i = 0; i < count; i++) {
             const angle = (i / count) * Math.PI * 2;
-            const speedVar = 50 + Math.sin(globalTime * 4) * 15; 
-            
+            const speedVar = 50 + Math.sin(globalTime * 4) * 15;
+
             const dir = new THREE.Vector3(
                 Math.cos(angle) * 0.2,
                 Math.sin(angle) * 0.2,

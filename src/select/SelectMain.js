@@ -74,6 +74,13 @@ async function init() {
   maxPassiveSlots = tempGlobalData.max_passive_slots || 8;
   maxEnergy = tempGlobalData.max_energy || 5;
 
+  // 重置当前选中的卡牌
+  currentWeaponCard = null;
+  currentPassiveCards = [];
+
+  // 清空现有的卡牌容器
+  deckContainer.innerHTML = '';
+
   for (const id in deckInventory) {
     if (deckInventory[id] > 0) {
       const card = createCardFromId(id);
@@ -82,6 +89,7 @@ async function init() {
   }
 
   setupDragAndDrop();
+  renderSlots(); // 渲染空的槽位
   recalculateParams();
 
   // 确认出战：生成 playerCur.json（继承global + 计算值）
@@ -118,7 +126,10 @@ async function init() {
     try {
       await storage.save('playerCur.json', playerCur);
 
-      // 只扣被动卡库存
+      // 扣除选中的武器卡和被动卡库存
+      if (currentWeaponCard) {
+        tempGlobalData.deck[currentWeaponCard.id] = (tempGlobalData.deck[currentWeaponCard.id] || 0) - 1;
+      }
       currentPassiveCards.forEach(card => {
         tempGlobalData.deck[card.id] = (tempGlobalData.deck[card.id] || 0) - 1;
       });

@@ -6,16 +6,16 @@
       "time": 1,
       "enemies": [
         {
-          "type": "wave_enemy",
+          "type": "spiral_enemy",
           "position": {
             "x": 0,
             "y": 100,
             "z": 200
           },
-          "hp": 1200,
+          "hp": 600,
           "options": {
-            "damage": 10,
-            "forwardSpeed": 5
+            "damage": 6,
+            "forwardSpeed": 4
           }
         },
         {
@@ -32,16 +32,16 @@
           }
         },
         {
-          "type": "wave_enemy",
+          "type": "fairy_red",
           "position": {
             "x": 0,
             "y": 100,
             "z": 400
           },
-          "hp": 1200,
+          "hp": 2000,
           "options": {
-            "damage": 10,
-            "forwardSpeed": 5
+            "damage": 8,
+            "forwardSpeed": 10
           }
         }
       ]
@@ -50,16 +50,16 @@
       "time": 15,
       "enemies": [
         {
-          "type": "tracker_enemy",
+          "type": "circle_enemy",
           "position": {
             "x": 0,
             "y": 100,
             "z": 400
           },
-          "hp": 1000,
+          "hp": 1600,
           "options": {
-            "damage": 8,
-            "forwardSpeed": 10
+            "damage": 12,
+            "forwardSpeed": 6
           }
         }
       ]
