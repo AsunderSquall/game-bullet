@@ -45,10 +45,11 @@ export async function loadPlayerData() {
 }
 
 export class Player {
-  constructor(group, hitSphere, data, enemies, playerBullets, enemyBullets) {
+  constructor(group, hitSphere, data, enemies, playerBullets, enemyBullets, battleInstance = null) {
     this.enemies = enemies;
     this.playerBullets = playerBullets;
     this.enemyBullets = enemyBullets;  // 用于符卡清弹
+    this.battleInstance = battleInstance; // 用于访问相机和其他战斗实例属性
 
     this.object = group;
     this.hitSphere = hitSphere;
@@ -71,6 +72,11 @@ export class Player {
     // 添加伤害音效相关属性
     this.lastDamageTime = 0;
     this.damageCooldown = 1.0; // 1秒伤害冷却时间
+
+    // 相机抖动相关属性
+    this.cameraShakeIntensity = 0;
+    this.cameraShakeDuration = 0;
+    this.cameraShakeTimer = 0;
 
     this.hitRadius = data.hitRadius;
     this.hitOffset = new THREE.Vector3(0, data.hitOffsetY, 0);
@@ -161,6 +167,9 @@ export class Player {
       this.lastDamageTime = now;
       // 播放随机射击音效（伤害音效），音量调低
       this.playDamageSound();
+
+      // 触发相机抖动效果
+      this.startCameraShake();
     }
 
     if (this.health <= 0) {
@@ -175,6 +184,42 @@ export class Player {
       console.log("玩家死亡");
     }
     this.invulnerableUntil = now + 1;
+  }
+
+  // 开始相机抖动
+  startCameraShake() {
+    // 设置抖动参数
+    this.cameraShakeIntensity = 3.0; // 抖动强度
+    this.cameraShakeDuration = 0.5; // 抖动持续时间（秒）
+    this.cameraShakeTimer = this.cameraShakeDuration;
+  }
+
+  // 更新相机抖动
+  updateCameraShake(delta) {
+    if (this.cameraShakeTimer > 0) {
+      this.cameraShakeTimer -= delta;
+
+      if (this.battleInstance && this.battleInstance.camera) {
+        const camera = this.battleInstance.camera;
+
+        // 计算抖动衰减
+        const shakeProgress = this.cameraShakeTimer / this.cameraShakeDuration;
+        const currentIntensity = this.cameraShakeIntensity * shakeProgress;
+
+        // 生成随机抖动偏移
+        const offsetX = (Math.random() - 0.5) * 2 * currentIntensity;
+        const offsetY = (Math.random() - 0.5) * 2 * currentIntensity;
+        const offsetZ = (Math.random() - 0.5) * 2 * currentIntensity;
+
+        // 应用抖动到相机位置
+        camera.position.x += offsetX;
+        camera.position.y += offsetY;
+        camera.position.z += offsetZ;
+      }
+    } else {
+      this.cameraShakeTimer = 0;
+      this.cameraShakeIntensity = 0;
+    }
   }
 
   playDamageSound() {
@@ -335,7 +380,7 @@ export class Player {
   }
 }
 
-export async function createPlayer(enemies, playerBullets, enemyBullets) {
+export async function createPlayer(enemies, playerBullets, enemyBullets, battleInstance = null) {
   const data = await loadPlayerData();
 
   const group = new THREE.Group();
@@ -396,7 +441,7 @@ export async function createPlayer(enemies, playerBullets, enemyBullets) {
 
   group.position.copy(new THREE.Vector3(data.position.x, data.position.y, data.position.z));
 
-  return new Player(group, hitSphere, data, enemies, playerBullets, enemyBullets);
+  return new Player(group, hitSphere, data, enemies, playerBullets, enemyBullets, battleInstance);
 }
 
 export function setupControls(rendererDom) {

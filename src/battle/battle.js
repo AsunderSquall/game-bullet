@@ -66,7 +66,7 @@ export class Battle {
 
     this.scene = createScene();
     // ★ 关键修改：多传 this.enemyBullets 给 createPlayer
-    this.player = await createPlayer(this.enemies, this.playerBullets, this.enemyBullets);
+    this.player = await createPlayer(this.enemies, this.playerBullets, this.enemyBullets, this);
     currentPlayer = this.player;
     this.scene.add(this.player.object);
 
@@ -194,6 +194,11 @@ export class Battle {
 
     // 更新动态模糊效果
     this.updateDynamicBlur(delta);
+
+    // 更新相机抖动效果
+    if (this.player) {
+      this.player.updateCameraShake(delta);
+    }
 
     // 使用 EffectComposer 渲染场景
     this.composer.render();
