@@ -1,5 +1,5 @@
 {
-  "health": 10,
+  "health": 100,
   "maxHealth": 100,
   "shields": 0,
   "bombs": 3,
@@ -17,5 +17,7 @@
     "y": 250,
     "z": 0
   },
-  "upgrades": []
+  "upgrades": [],
+  "modelPath": "models/project_-_doremy_sweet_fumo_model.glb",
+  "modelScale": 3.4
 }

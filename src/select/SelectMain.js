@@ -4,6 +4,7 @@ import { createCardFromId } from '../cards/CardFactory.js';
 import { Battle } from '../battle/battle.js';
 import { musicManager } from '../utils/musicManager.js';
 
+
 // 临时全局数据（内存操作）
 let tempGlobalData = null;
 
@@ -125,13 +126,14 @@ async function init() {
 
       position: { x: 0, y: 250, z: 0 },
 
-      upgrades: computed.upgrades || []  // 临时升级不漏！
+      upgrades: computed.upgrades || [],  // 临时升级不漏！
+      modelPath: tempGlobalData.modelPath,
+      modelScale: tempGlobalData.modelScale
     };
 
     try {
       await storage.save('playerCur.json', playerCur);
 
-      // 扣除选中的武器卡和被动卡库存
       if (currentWeaponCard) {
         tempGlobalData.deck[currentWeaponCard.id] = (tempGlobalData.deck[currentWeaponCard.id] || 0) - 1;
       }

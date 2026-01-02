@@ -8,6 +8,7 @@ import { Battle } from './battle/battle.js';
 import { showRest } from './select/RestMain.js';
 import { EventMain } from './event/EventMain.js';
 import { musicManager } from './utils/musicManager.js';
+import { SelectModelMain } from './select/SelectModelMain.js';
 
 console.log('✨ 猫娘来啦～欢迎主人进入弹幕冒险世界！');
 
@@ -59,12 +60,24 @@ async function init() {
   btnContinue.onclick = continueGame;
   btnSettings.onclick = openSettings;
 }
-
 async function startNewGame() {
-  console.log('✨ 生成专属地图！');
+  console.log('✨ 开始新游戏，正在保留模型偏好...');
+
+  // 1. 尝试读取现有的全局数据
+  const existingGlobal = await storage.load_global('global.json');
+  
+  // 2. 提取已有的模型参数，如果没有则给定默认值
+  const savedModelPath = (existingGlobal && existingGlobal.modelPath) 
+                         ? existingGlobal.modelPath 
+                         : 'models/project_-_reisen_udongein_inaba_fumo_model.glb';
+  
+  const savedModelScale = (existingGlobal && existingGlobal.modelScale) 
+                          ? existingGlobal.modelScale 
+                          : 2.9;
 
   const newMap = createMap(8);
 
+  // 3. 构建新的 globalData，继承模型参数
   let globalData = {
     money: 100,
     health: 100,
@@ -76,16 +89,18 @@ async function startNewGame() {
       passive002: 1,
     },
     max_passive_slots: 2,
-    max_energy: 3
+    max_energy: 3,
+    // 关键继承点：
+    modelPath: savedModelPath,
+    modelScale: savedModelScale
   };
 
   globalData.map = newMap;
   globalData.currentPath = [];
-  globalData.bossDefeated = false; // 重置boss击败标志
+  globalData.bossDefeated = false;
 
   await storage.save_global('global.json', globalData);
 
-  // 重置玩家当前数据
   const playerData = {
     health: 100,
     maxHealth: 100,
@@ -109,7 +124,7 @@ async function startNewGame() {
 
   await storage.save('playerCur.json', playerData);
 
-  console.log('✅ 地图生成成功！');
+  console.log('✅ 存档初始化完成，已继承模型设置！');
   document.body.innerHTML = '';
   await showMap();
 }
@@ -165,8 +180,12 @@ async function continueGame() {
   }
 }
 
-function openSettings() {
-  showMessage('设定功能还在开发中！', 3000);
+async function openSettings() {
+  console.log('✨ 进入角色选择设置');
+  document.body.innerHTML = ''; // 清空主界面
+  
+  
+  await SelectModelMain();
 }
 
 function showMessage(text, duration = 2500) {

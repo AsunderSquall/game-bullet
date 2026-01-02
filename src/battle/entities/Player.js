@@ -2,8 +2,7 @@
 // Player.js（重构版 + 符卡系统）
 // ==========================
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { storage } from '../../utils/storage.js';
 import { currentPlayer } from '../battle.js';
 import { musicManager } from '../../utils/musicManager.js';
@@ -380,11 +379,13 @@ export class Player {
   }
 }
 
+
 export async function createPlayer(enemies, playerBullets, enemyBullets, battleInstance = null) {
   const data = await loadPlayerData();
 
   const group = new THREE.Group();
 
+  // 判定点核心（红色小球）
   const sphereGeometry = new THREE.SphereGeometry(0.25, 16, 12);
   const sphereMaterial = new THREE.MeshBasicMaterial({
     color: 0xff0000,
@@ -398,45 +399,50 @@ export async function createPlayer(enemies, playerBullets, enemyBullets, battleI
   hitSphere.position.y += data.hitOffsetY;
   group.add(hitSphere);
 
-  const mtlLoader = new MTLLoader();
-  mtlLoader.setPath('../models/sakuya-plushie/');
-  mtlLoader.load('model.mtl', (materials) => {
-    materials.preload();
+  // --- GLB 模型加载逻辑 ---
+  const gltfLoader = new GLTFLoader();
+  const modelPath = playerData.modelPath;
+  const modelScale = playerData.modelScale/7;
+  console.log("modelPath=",modelPath);
+  gltfLoader.load(modelPath, (gltf) => {
+    const model = gltf.scene;
 
-    const objLoader = new OBJLoader();
-    objLoader.setMaterials(materials);
-    objLoader.setPath('/models/sakuya-plushie/');
-    objLoader.load('model.obj', (obj) => {
-      obj.scale.set(0.2, 0.2, 0.2);
-      obj.rotation.x = -Math.PI / 2;
+    model.scale.set(modelScale, modelScale, modelScale); 
+    
 
-      obj.traverse((child) => {
-        if (!child.isMesh) return;
+    model.traverse((child) => {
+      if (!child.isMesh) return;
+      const base = child.material;
 
-        const base = child.material;
+      const normal = base.clone();
+      normal.transparent = true;
+      normal.opacity = 0.5;
+      normal.depthWrite = true;
+      normal.side = THREE.DoubleSide;
 
-        const normal = base.clone();
-        normal.transparent = true;
-        normal.opacity = 0.3;
-        normal.depthWrite = false;
-        normal.side = THREE.DoubleSide;
+      const red = base.clone();
+      red.transparent = true;
+      red.opacity = 0.5;
+      red.color.set(0xff2222);
+      red.emissive.set(0xff0000);
+      red.emissiveIntensity = 0.5;
+      red.depthWrite = true;
+      red.side = THREE.DoubleSide;
 
-        const red = base.clone();
-        red.transparent = true;
-        red.opacity = 0.25;
-        red.color.set(0xff2222);
-        red.emissive.set(0xff5555);
-        red.emissiveIntensity = 0.2;
-        red.depthWrite = false;
-        red.side = THREE.DoubleSide;
+      child.userData.normalMat = normal;
+      child.userData.redMat = red;
 
-        child.userData.normalMat = normal;
-        child.userData.redMat = red;
-
-        child.material = normal;
-      });
-      group.add(obj);
+      child.material = normal;
     });
+
+    group.add(model);
+  }, 
+  (xhr) => {
+    // 可选：打印加载进度
+    // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+  }, 
+  (error) => {
+    console.error('An error happened loading the GLB model:', error);
   });
 
   group.position.copy(new THREE.Vector3(data.position.x, data.position.y, data.position.z));

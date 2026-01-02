@@ -21,8 +21,10 @@ export class Enemy {
   update(delta, globalTime) { }
 
   takeDamage(damage) {
+    console.log("take damage",damage);
     if (this.dead) return false;
     this.hp -= damage;
+    console.log("left hp =",this.hp);
     this.onHit?.();
     if (this.hp <= 0)
     {  

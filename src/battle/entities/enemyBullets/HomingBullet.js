@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseEnemyBullet } from './BaseEnemyBullet.js';
 
+
 export class HomingBullet extends BaseEnemyBullet {
   constructor(scene, position, direction, options = {}) {
     // 调用父类构造函数
