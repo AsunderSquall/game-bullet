@@ -8,7 +8,7 @@ export class BasePlayerBullet {
     this.direction = direction.clone().normalize();
     
     // 基础属性
-    this.speed = options.speed || 50;
+    this.speed = options.speed || 120;
     this.damage = options.damage || 28;
     this.size = options.size || 0.5;
     this.color = options.color || 0x88ccff;
