@@ -64,8 +64,21 @@ export class Battle {
     // 重置庆祝音效播放标志
     this.celebrateSoundPlayed = false;
 
-    // 清理之前的DOM内容，避免界面残留
-    document.body.innerHTML = '';
+    // 清理之前的UI界面内容，但保留HUD等必要元素
+    const elementsToRemove = [];
+    for (let i = 0; i < document.body.children.length; i++) {
+      const child = document.body.children[i];
+      // 保留canvas、HUD容器和其他重要元素，只移除非战斗相关的UI元素
+      if (child.tagName !== 'CANVAS' &&
+          child.id !== 'hud-container' &&
+          !child.classList.contains('hud-element')) {
+        elementsToRemove.push(child);
+      }
+    }
+
+    elementsToRemove.forEach(child => {
+      document.body.removeChild(child);
+    });
 
     this.scene = createScene();
     // ★ 关键修改：多传 this.enemyBullets 给 createPlayer
@@ -81,6 +94,9 @@ export class Battle {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // 设置canvas的z-index确保它在HUD后面
+    this.renderer.domElement.style.zIndex = '1';
     document.body.appendChild(this.renderer.domElement);
 
     setupControls(this.renderer.domElement);
