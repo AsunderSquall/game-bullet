@@ -209,7 +209,10 @@ export class Battle {
     this.updatePlayerBullets(delta);
     this.updateCamera();
     this.updateBackground(delta); // Update the dynamic background
-    updateHUD(currentPlayer);
+
+    // 检测是否有boss敌人
+    const boss = this.findBossEnemy();
+    updateHUD(currentPlayer, boss);
 
     // 更新动态模糊效果
     this.updateDynamicBlur(delta);
@@ -315,6 +318,22 @@ export class Battle {
     });
 
     this.checkWinCondition();
+  }
+
+  // 检测是否有boss敌人
+  findBossEnemy() {
+    // 遍历所有敌人，查找boss类型的敌人
+    for (const enemy of this.enemies) {
+      // 检查敌人是否是boss类型（通过检查是否有boss相关属性或类型）
+      if (enemy.isBoss ||
+          enemy.constructor.name.includes('Boss') ||
+          enemy.type === 'boss' ||
+          enemy.name?.toLowerCase().includes('boss') ||
+          enemy.constructor.name === 'GalacticBoss') { // 特别检查GalacticBoss
+        return enemy;
+      }
+    }
+    return null; // 没有找到boss
   }
 
   updateEnemyBullets(delta) {
