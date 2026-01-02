@@ -64,6 +64,9 @@ export class Battle {
     // 重置庆祝音效播放标志
     this.celebrateSoundPlayed = false;
 
+    // 清理之前的DOM内容，避免界面残留
+    document.body.innerHTML = '';
+
     this.scene = createScene();
     // ★ 关键修改：多传 this.enemyBullets 给 createPlayer
     this.player = await createPlayer(this.enemies, this.playerBullets, this.enemyBullets, this);
