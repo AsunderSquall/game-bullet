@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { storage } from '../../utils/storage.js';
 import { currentPlayer } from '../battle.js';
 import { musicManager } from '../../utils/musicManager.js';
+import { ParticleSystem } from '../utils/ParticleSystem.js';
 
 export const keys = { w: false, a: false, s: false, d: false, shift: false };
 export let scrollSpeed = 0;
@@ -37,7 +38,7 @@ export async function loadPlayerData() {
     regenTimer: 0,
     totem: 0,
     bulletType: "sakuya_knife_normal",
-    position: { x: 0, y: 15, z: 0 },
+    position: { x: 0, y: 250, z: 0 },
     upgrades: []
   });
   return playerData;
@@ -77,10 +78,23 @@ export class Player {
     this.cameraShakeDuration = 0;
     this.cameraShakeTimer = 0;
 
+    // 粒子系统相关属性
+    this.particleSystem = null;
+
     this.hitRadius = data.hitRadius;
     this.hitOffset = new THREE.Vector3(0, data.hitOffsetY, 0);
     global_hitOffset = this.hitOffset;
     this.dead = false;
+
+    // 动画相关属性
+    this.mixer = null;
+    this.spellCardAnimationAction = null;
+
+    // 程序化动画相关属性
+    this.isAnimatingSpell = false;
+    this.spellAnimationProgress = 0;
+    this.spellAnimationDuration = 0.5; // 动画持续时间（秒）
+    this.originalBonePositions = {}; // 存储原始骨骼位置
 
     // 预加载子弹类
     this.sakuyaKnifeClass = null;
@@ -108,7 +122,7 @@ export class Player {
       if (this.data.bulletType === 'homeing_knife') {
         return new BulletClass(this.object.parent, position, direction, { damage: damage }, this.enemies);
       } else {
-        return new BulletClass(this.object.parent, position, direction, { damage: damage });
+        return new BulletClass(this.object.parent, position, direction, { damage: damage }, this.data);
       }
     }
     return null;
@@ -130,6 +144,9 @@ export class Player {
     this.spellCardActive = true;
     this.spellCardTimer = 0;
     this.spellCardCooldown = 8;
+
+    // 开始程序化投掷炸弹动画
+    this.startSpellAnimation();
 
     const geometry = new THREE.SphereGeometry(1, 32, 24);
     const material = new THREE.MeshBasicMaterial({
@@ -169,6 +186,9 @@ export class Player {
 
       // 触发相机抖动效果
       this.startCameraShake();
+
+      // Create damage indicator particles
+      this.particleSystem.createDamageIndicator(this.object.position.clone().add(new THREE.Vector3(0, 2, 0)), amount);
     }
 
     if (this.health <= 0) {
@@ -188,10 +208,11 @@ export class Player {
   // 开始相机抖动
   startCameraShake() {
     // 设置抖动参数
-    this.cameraShakeIntensity = 3.0; // 抖动强度
-    this.cameraShakeDuration = 0.5; // 抖动持续时间（秒）
+    this.cameraShakeIntensity = 1.0; // 抖动强度
+    this.cameraShakeDuration = 0.2; // 抖动持续时间（秒）
     this.cameraShakeTimer = this.cameraShakeDuration;
   }
+
 
   // 更新相机抖动
   updateCameraShake(delta) {
@@ -221,6 +242,79 @@ export class Player {
     }
   }
 
+  // 开始投掷炸弹动画
+  startSpellAnimation() {
+    this.isAnimatingSpell = true;
+    this.spellAnimationProgress = 0;
+
+    // 查找手臂或相关骨骼（针对fumo模型的常见命名）
+    this.armBones = [];
+    this.originalBoneRotations = new Map();
+
+    this.object.traverse((child) => {
+      if (child.isBone && (
+        child.name.toLowerCase().includes('arm') ||
+        child.name.toLowerCase().includes('hand') ||
+        child.name.toLowerCase().includes('shoulder') ||
+        child.name.toLowerCase().includes('upperarm') ||
+        child.name.toLowerCase().includes('forearm') ||
+        child.name.toLowerCase().includes('left') ||
+        child.name.toLowerCase().includes('right')
+      )) {
+        this.armBones.push(child);
+        // 保存原始旋转
+        this.originalBoneRotations.set(child, {
+          x: child.rotation.x,
+          y: child.rotation.y,
+          z: child.rotation.z,
+          quaternion: child.quaternion.clone()
+        });
+      }
+    });
+  }
+
+  // 更新投掷炸弹动画
+  updateSpellAnimation(delta) {
+    if (!this.isAnimatingSpell) return;
+
+    this.spellAnimationProgress += delta;
+    const progress = Math.min(this.spellAnimationProgress / this.spellAnimationDuration, 1);
+
+    // 使用正弦波动画使手臂动作更自然
+    const armMovement = Math.sin(progress * Math.PI); // 0到1再到0
+
+    // 旋转手臂骨骼以模拟投掷动作
+    this.armBones.forEach(bone => {
+      const originalRotation = this.originalBoneRotations.get(bone);
+      if (originalRotation) {
+        // 重置到原始位置
+        bone.rotation.x = originalRotation.x;
+        bone.rotation.y = originalRotation.y;
+        bone.rotation.z = originalRotation.z;
+
+        // 应用动画旋转 - 模拟投掷炸弹的手臂动作
+        bone.rotation.x -= armMovement * 1.2; // 向前挥动
+        bone.rotation.z += armMovement * 0.5; // 旋转效果
+      }
+    });
+
+    // 动画完成后重置状态
+    if (progress >= 1) {
+      this.isAnimatingSpell = false;
+      this.spellAnimationProgress = 0;
+
+      // 确保所有骨骼回到原始位置
+      this.armBones.forEach(bone => {
+        const originalRotation = this.originalBoneRotations.get(bone);
+        if (originalRotation) {
+          bone.rotation.x = originalRotation.x;
+          bone.rotation.y = originalRotation.y;
+          bone.rotation.z = originalRotation.z;
+        }
+      });
+    }
+  }
+
   playDamageSound() {
     // 创建一个临时音频实例用于播放伤害音效
     // 随机选择一个射击音效
@@ -239,6 +333,19 @@ export class Player {
   }
 
   update(delta) {
+    // 更新动画混合器
+    if (this.mixer) {
+      this.mixer.update(delta);
+    }
+
+    // 更新程序化动画
+    this.updateSpellAnimation(delta);
+
+    // Update particle system
+    if (this.particleSystem) {
+      this.particleSystem.update(delta);
+    }
+
     if (this.spellCardCooldown > 0) {
       this.spellCardCooldown -= delta;
       if (this.spellCardCooldown < 0) this.spellCardCooldown = 0;
@@ -317,12 +424,12 @@ export class Player {
         }
 
         if (this.hitSphere) this.hitSphere.visible = keys.shift;
-      
+
         this.shootTimer += delta;
         if (shooting !== this.lastShootingState) {
         this.lastShootingState = shooting;
         this.object.traverse((child) => {
-          if (child.isMesh && child.userData?.normalMat) { 
+          if (child.isMesh && child.userData?.normalMat) {
             child.material = shooting ? child.userData.redMat : child.userData.normalMat;
           }
         });
@@ -384,6 +491,7 @@ export async function createPlayer(enemies, playerBullets, enemyBullets, battleI
   const data = await loadPlayerData();
 
   const group = new THREE.Group();
+  group.userData.player = null; // 用于在模型加载后设置Player实例
 
   // 判定点核心（红色小球）
   const sphereGeometry = new THREE.SphereGeometry(0.25, 16, 12);
@@ -407,8 +515,29 @@ export async function createPlayer(enemies, playerBullets, enemyBullets, battleI
   gltfLoader.load(modelPath, (gltf) => {
     const model = gltf.scene;
 
-    model.scale.set(modelScale, modelScale, modelScale); 
-    
+    model.scale.set(modelScale, modelScale, modelScale);
+
+    // 设置动画混合器
+    const player = group.userData.player; // 获取Player实例
+    if (gltf.animations && gltf.animations.length > 0) {
+      player.mixer = new THREE.AnimationMixer(model);
+
+      // 查找投掷炸弹的动画（假设动画名称包含'spell'或'throw'）
+      const spellAnimation = gltf.animations.find(clip =>
+        clip.name.toLowerCase().includes('spell') ||
+        clip.name.toLowerCase().includes('throw') ||
+        clip.name.toLowerCase().includes('bomb')
+      );
+
+      if (spellAnimation) {
+        player.spellCardAnimationAction = player.mixer.clipAction(spellAnimation);
+      } else {
+        console.log('未找到投掷炸弹动画，可用动画:', gltf.animations.map(clip => clip.name));
+      }
+    }
+
+    // 旋转模型使其朝前（从朝右旋转+90度绕Y轴）
+    // model.rotation.y = Math.PI / 2;
 
     model.traverse((child) => {
       if (!child.isMesh) return;
@@ -436,18 +565,26 @@ export async function createPlayer(enemies, playerBullets, enemyBullets, battleI
     });
 
     group.add(model);
-  }, 
+  },
   (xhr) => {
     // 可选：打印加载进度
     // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-  }, 
+  },
   (error) => {
     console.error('An error happened loading the GLB model:', error);
   });
 
   group.position.copy(new THREE.Vector3(data.position.x, data.position.y, data.position.z));
 
-  return new Player(group, hitSphere, data, enemies, playerBullets, enemyBullets, battleInstance);
+  const player = new Player(group, hitSphere, data, enemies, playerBullets, enemyBullets, battleInstance);
+  group.userData.player = player; // 设置Player实例引用，以便在模型加载后访问
+
+  // Initialize particle system if battle instance is available
+  if (battleInstance && battleInstance.scene) {
+    player.particleSystem = new ParticleSystem(battleInstance.scene);
+  }
+
+  return player;
 }
 
 export function setupControls(rendererDom) {

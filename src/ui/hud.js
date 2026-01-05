@@ -306,11 +306,11 @@ export function updateHUD(player, boss = null) {
       bossName.textContent = boss.constructor.name.toUpperCase();
     }
 
-    // 计算boss血量百分比
+    // 计算boss血量百分比 - 使用正确的属性名 (hp, maxHp)
     let bossHealthPercent = 100;
-    if (boss.maxHealth && boss.maxHealth > 0) {
-      const currentBossHealth = boss.health || 0;
-      bossHealthPercent = Math.max(0, (currentBossHealth / boss.maxHealth) * 100);
+    if (boss.maxHp && boss.maxHp > 0) {
+      const currentBossHealth = boss.hp || 0;
+      bossHealthPercent = Math.max(0, (currentBossHealth / boss.maxHp) * 100);
     }
 
     // 更新boss血量条

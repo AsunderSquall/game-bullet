@@ -27,7 +27,7 @@ function createScaledEnemy(id, x, z, hpGrowth, dmgGrowth, eliteMult) {
     const base = ENEMY_BASE_STATS[id];
     return {
         type: id,
-        position: { x, y: 100, z },
+        position: { x, y: 250, z },
         hp: Math.floor(base.hp * hpGrowth * eliteMult),
         options: {
             damage: Math.floor(base.dmg * dmgGrowth),

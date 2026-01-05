@@ -349,7 +349,12 @@ export class Battle {
   updatePlayerBullets(delta) {
     for (let i = this.playerBullets.length - 1; i >= 0; i--) {
       const b = this.playerBullets[i];
-      b.update(delta,this.enemies,this.time);
+      // 检查子弹类型，如果是HomingKnife则传递globalTime参数
+      if (b.constructor.name === 'HomingKnife') {
+        b.update(delta, this.enemies, this.time);
+      } else {
+        b.update(delta, this.enemies);
+      }
       if (b.markedForDeletion) {
         this.playerBullets.splice(i,1);
       }
@@ -816,6 +821,11 @@ async showVictoryScreen() {
       this.composer.renderPass = null;
       this.composer.passes = [];
       this.composer = null;
+    }
+
+    // 清理粒子系统
+    if (this.player && this.player.particleSystem) {
+      this.player.particleSystem.dispose();
     }
 
     // 清理事件监听器
