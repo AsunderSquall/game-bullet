@@ -18,6 +18,15 @@ export class HomingBullet extends BaseEnemyBullet {
     this.maxTurnAngle = options.maxTurnAngle || 0.05; // 每帧最大转向角度
     this.isPlayerBullet = options.isPlayerBullet || false; // 是否为玩家子弹
     this.velocity = this.direction.clone().multiplyScalar(this.speed);
+
+    // 添加追踪尾迹效果
+    this.trailPositions = [];
+    this.maxTrailLength = 10;
+    this.trailTimer = 0;
+    this.trailInterval = 0.03; // 尾迹更新间隔
+
+    // 创建尾迹几何体和材质
+    this.createTrailGeometry();
   }
 
   update(delta, player, globalTime) {
@@ -30,6 +39,9 @@ export class HomingBullet extends BaseEnemyBullet {
 
     // 更新位置
     this.mesh.position.add(this.velocity.clone().multiplyScalar(delta));
+
+    // 更新追踪尾迹
+    this.updateTrail(delta, globalTime);
 
     // 调用父类的更新方法
     super.update(delta, player, globalTime);
@@ -70,18 +82,112 @@ export class HomingBullet extends BaseEnemyBullet {
     const material = new THREE.MeshStandardMaterial({
       color: options.color || 0xff66ff,
       emissive: options.color || 0xff66ff, // 使用相同颜色作为自发光
-      emissiveIntensity: 0.5, // 适度的自发光强度
-      metalness: 0.05,
-      roughness: 0.25,
+      emissiveIntensity: 0.8, // 增强自发光强度
+      metalness: 0.1,
+      roughness: 0.2,
       transparent: true,
-      opacity: 0.9
+      opacity: 0.95,
+      // 添加更多视觉效果
+      side: THREE.DoubleSide
     });
     const bulletMesh = new THREE.Mesh(geometry, material);
 
     return bulletMesh;
   }
 
+  createTrailGeometry() {
+    // 创建尾迹粒子系统
+    this.trailParticles = [];
+    this.maxTrailParticles = 15; // 最大尾迹粒子数
+  }
+
+  updateTrail(delta, globalTime) {
+    this.trailTimer += delta;
+
+    // 定期添加尾迹粒子
+    if (this.trailTimer >= this.trailInterval) {
+      this.trailTimer = 0;
+
+      // 创建尾迹粒子
+      this.createTrailParticle();
+    }
+
+    // 更新现有尾迹粒子
+    this.updateTrailParticles(delta);
+  }
+
+  createTrailParticle() {
+    // 创建一个较小的尾迹粒子
+    const particleGeometry = new THREE.SphereGeometry(this.size * 0.4, 6, 6);
+    const particleMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff66ff,
+      transparent: true,
+      opacity: 0.6,
+      depthWrite: false
+    });
+
+    const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+    // 尾迹粒子稍微滞后于子弹位置
+    particle.position.copy(this.mesh.position.clone().add(
+      this.velocity.clone().normalize().multiplyScalar(-2)
+    ));
+    this.scene.add(particle);
+
+    // 添加到尾迹粒子数组
+    this.trailParticles.push({
+      mesh: particle,
+      life: 0.0,
+      maxLife: 0.5, // 粒子生命周期
+      initialScale: particle.scale.clone(),
+      initialOpacity: 0.6
+    });
+
+    // 限制尾迹粒子数量
+    if (this.trailParticles.length > this.maxTrailParticles) {
+      const oldParticle = this.trailParticles.shift();
+      this.scene.remove(oldParticle.mesh);
+      oldParticle.mesh.geometry.dispose();
+      oldParticle.mesh.material.dispose();
+    }
+  }
+
+  updateTrailParticles(delta) {
+    for (let i = this.trailParticles.length - 1; i >= 0; i--) {
+      const particle = this.trailParticles[i];
+      particle.life += delta;
+
+      if (particle.life >= particle.maxLife) {
+        // 移除生命周期结束的粒子
+        this.scene.remove(particle.mesh);
+        particle.mesh.geometry.dispose();
+        particle.mesh.material.dispose();
+        this.trailParticles.splice(i, 1);
+      } else {
+        // 更新粒子大小和透明度，创建淡出效果
+        const lifeRatio = particle.life / particle.maxLife;
+        const scaleRatio = 1 - lifeRatio * 0.7; // 随时间稍微缩小
+        particle.mesh.scale.set(
+          particle.initialScale.x * scaleRatio,
+          particle.initialScale.y * scaleRatio,
+          particle.initialScale.z * scaleRatio
+        );
+
+        // 更新粒子透明度
+        const opacity = particle.initialOpacity * (1 - lifeRatio);
+        particle.mesh.material.opacity = opacity;
+      }
+    }
+  }
+
   destroy() {
+    // 清理所有尾迹粒子
+    for (const particle of this.trailParticles) {
+      this.scene.remove(particle.mesh);
+      if (particle.mesh.geometry) particle.mesh.geometry.dispose();
+      if (particle.mesh.material) particle.mesh.material.dispose();
+    }
+    this.trailParticles = [];
+
     // 调用父类销毁方法
     super.destroy();
   }
