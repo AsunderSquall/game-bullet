@@ -21,7 +21,7 @@ export function createMap(layers = 8, minNodes = 3, maxNodes = 6) {
       let type;
 
       if (layer === 0) {
-        type = 'normal';
+        type = 'boss';
       }
       else if (layer === layers - 1) {
         type = 'rest';

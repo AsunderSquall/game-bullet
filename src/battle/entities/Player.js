@@ -141,27 +141,17 @@ export class Player {
     this.data.bombs -= 1;
     storage.set('playerCur.json', { ...this.data, bombs: this.data.bombs });
 
-    this.spellCardActive = true;
+    // 不立即激活符卡，而是等待动画完成
+    this.spellCardPending = true; // 标记符卡待激活
     this.spellCardTimer = 0;
     this.spellCardCooldown = 8;
 
     // 开始程序化投掷炸弹动画
     this.startSpellAnimation();
 
-    const geometry = new THREE.SphereGeometry(1, 32, 24);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xcc99ff,
-      transparent: true,
-      opacity: 0.28,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending
-    });
-    this.spellCardSphere = new THREE.Mesh(geometry, material);
-    this.spellCardSphere.position.copy(this.getHitPosition());
-    this.object.parent.add(this.spellCardSphere);
-
-    console.log("✨ 符卡发动！完美结界展开～");
+    // 不立即创建符卡球体，而是等待动画完成
+    // 符卡球体将在动画完成后在update方法中创建
+    console.log("✨ 开始投掷符卡～");
     return true;
   }
 
@@ -246,9 +236,11 @@ export class Player {
   startSpellAnimation() {
     this.isAnimatingSpell = true;
     this.spellAnimationProgress = 0;
+    this.spellAnimationDuration = 1.5; // 大幅增加动画持续时间，让投掷动作慢得多
 
-    // 查找手臂或相关骨骼（针对fumo模型的常见命名）
-    this.armBones = [];
+    // 查找左右手臂骨骼
+    this.leftArmBones = [];
+    this.rightArmBones = [];
     this.originalBoneRotations = new Map();
 
     this.object.traverse((child) => {
@@ -256,12 +248,19 @@ export class Player {
         child.name.toLowerCase().includes('arm') ||
         child.name.toLowerCase().includes('hand') ||
         child.name.toLowerCase().includes('shoulder') ||
-        child.name.toLowerCase().includes('upperarm') ||
-        child.name.toLowerCase().includes('forearm') ||
-        child.name.toLowerCase().includes('left') ||
-        child.name.toLowerCase().includes('right')
+        child.name.toLowerCase().includes('upper_arm') ||
+        child.name.toLowerCase().includes('forearm')
       )) {
-        this.armBones.push(child);
+        if (child.name.toLowerCase().includes('.l_') || child.name.toLowerCase().includes('_l')) {
+          this.leftArmBones.push(child);
+        } else if (child.name.toLowerCase().includes('.r_') || child.name.toLowerCase().includes('_r')) {
+          this.rightArmBones.push(child);
+        } else {
+          // 如果没有明确标识左右，可以默认选择一个手臂或两个都用
+          // 这里我们假设使用右手进行投掷
+          this.rightArmBones.push(child);
+        }
+
         // 保存原始旋转
         this.originalBoneRotations.set(child, {
           x: child.rotation.x,
@@ -280,11 +279,39 @@ export class Player {
     this.spellAnimationProgress += delta;
     const progress = Math.min(this.spellAnimationProgress / this.spellAnimationDuration, 1);
 
-    // 使用正弦波动画使手臂动作更自然
-    const armMovement = Math.sin(progress * Math.PI); // 0到1再到0
+    // 真实的投掷动作：准备 -> 拉回 -> 投掷 -> 恢复
+    let armRotationX = 0;
+    let armRotationY = 0;
+    let armRotationZ = 0;
 
-    // 旋转手臂骨骼以模拟投掷动作
-    this.armBones.forEach(bone => {
+    if (progress < 0.3) {
+      // 准备阶段：手臂从自然位置抬起到准备投掷位置
+      const prepProgress = progress / 0.3;
+      armRotationX = -prepProgress * 0.5; // 轻微向后
+      armRotationY = prepProgress * 0.8;  // 向侧面抬起
+      armRotationZ = prepProgress * 0.3;  // 手腕轻微旋转
+    } else if (progress < 0.5) {
+      // 拉回阶段：手臂向后拉，准备发力
+      const pullProgress = (progress - 0.3) / 0.2;
+      armRotationX = -0.5 - pullProgress * 0.8; // 向后拉
+      armRotationY = 0.8 - pullProgress * 0.3;  // 稍微收回
+      armRotationZ = 0.3 + pullProgress * 0.5;  // 手腕旋转准备投掷
+    } else if (progress < 0.8) {
+      // 投掷阶段：手臂快速向前下方投掷
+      const throwProgress = (progress - 0.5) / 0.3;
+      armRotationX = -1.3 + throwProgress * 2.5; // 快速向前
+      armRotationY = 0.5 - throwProgress * 1.0;  // 向前下方
+      armRotationZ = 0.8 - throwProgress * 1.0;  // 手腕旋转
+    } else {
+      // 恢复阶段：手臂回到自然位置
+      const recoveryProgress = (progress - 0.8) / 0.2;
+      armRotationX = 1.2 - recoveryProgress * 1.2; // 回到自然位置
+      armRotationY = -0.5 + recoveryProgress * 0.5; // 回到自然位置
+      armRotationZ = -0.2 + recoveryProgress * 0.2; // 回到自然位置
+    }
+
+    // 旋转右手骨骼以模拟投掷动作（假设使用右手投掷）
+    this.rightArmBones.forEach(bone => {
       const originalRotation = this.originalBoneRotations.get(bone);
       if (originalRotation) {
         // 重置到原始位置
@@ -292,9 +319,29 @@ export class Player {
         bone.rotation.y = originalRotation.y;
         bone.rotation.z = originalRotation.z;
 
-        // 应用动画旋转 - 模拟投掷炸弹的手臂动作
-        bone.rotation.x -= armMovement * 1.2; // 向前挥动
-        bone.rotation.z += armMovement * 0.5; // 旋转效果
+        // 应用动画旋转 - 模拟真实的投掷动作
+        bone.rotation.x += armRotationX;
+        bone.rotation.y += armRotationY;
+        bone.rotation.z += armRotationZ;
+      }
+    });
+
+    // 为更真实的效果，对身体其他部分添加轻微的协调动作
+    this.object.traverse((child) => {
+      if (child.isBone && !this.rightArmBones.includes(child) && !this.leftArmBones.includes(child)) {
+        const originalRotation = this.originalBoneRotations.get(child);
+        if (originalRotation) {
+          // 保持原始旋转
+          child.rotation.x = originalRotation.x;
+          child.rotation.y = originalRotation.y;
+          child.rotation.z = originalRotation.z;
+
+          // 轻微的身体转动配合投掷动作
+          if (progress < 0.8) {
+            // 在投掷过程中，身体轻微向投掷方向转动
+            child.rotation.y += Math.sin(progress * Math.PI * 1.25) * 0.15 * (progress < 0.5 ? 1 : -1);
+          }
+        }
       }
     });
 
@@ -304,12 +351,14 @@ export class Player {
       this.spellAnimationProgress = 0;
 
       // 确保所有骨骼回到原始位置
-      this.armBones.forEach(bone => {
-        const originalRotation = this.originalBoneRotations.get(bone);
-        if (originalRotation) {
-          bone.rotation.x = originalRotation.x;
-          bone.rotation.y = originalRotation.y;
-          bone.rotation.z = originalRotation.z;
+      this.object.traverse((child) => {
+        if (child.isBone) {
+          const originalRotation = this.originalBoneRotations.get(child);
+          if (originalRotation) {
+            child.rotation.x = originalRotation.x;
+            child.rotation.y = originalRotation.y;
+            child.rotation.z = originalRotation.z;
+          }
         }
       });
     }
@@ -340,6 +389,28 @@ export class Player {
 
     // 更新程序化动画
     this.updateSpellAnimation(delta);
+
+    // 检查是否需要在动画完成后创建符卡球体
+    if (this.spellCardPending && !this.isAnimatingSpell && !this.spellCardSphere) {
+      // 动画完成，激活符卡
+      this.spellCardActive = true;
+      this.spellCardPending = false; // 清除待激活标记
+
+      // 创建符卡球体
+      const geometry = new THREE.SphereGeometry(1, 32, 24);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xcc99ff,
+        transparent: true,
+        opacity: 0.28,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      this.spellCardSphere = new THREE.Mesh(geometry, material);
+      this.spellCardSphere.position.copy(this.getHitPosition());
+      this.object.parent.add(this.spellCardSphere);
+      console.log("✨ 符卡发动！完美结界展开～");
+    }
 
     // Update particle system
     if (this.particleSystem) {

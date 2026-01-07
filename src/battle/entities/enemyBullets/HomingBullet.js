@@ -104,8 +104,12 @@ export class HomingBullet extends BaseEnemyBullet {
   updateTrail(delta, globalTime) {
     this.trailTimer += delta;
 
-    // 定期添加尾迹粒子
-    if (this.trailTimer >= this.trailInterval) {
+    // 计算子弹速度，如果速度过快则不添加尾迹粒子
+    const speed = this.velocity.length();
+    const maxSpeedForTrail = 15; // 设置最大速度阈值
+
+    // 定期添加尾迹粒子（仅当速度未超过阈值时）
+    if (this.trailTimer >= this.trailInterval && speed <= maxSpeedForTrail) {
       this.trailTimer = 0;
 
       // 创建尾迹粒子
@@ -120,7 +124,7 @@ export class HomingBullet extends BaseEnemyBullet {
     // 创建一个较小的尾迹粒子
     const particleGeometry = new THREE.SphereGeometry(this.size * 0.4, 6, 6);
     const particleMaterial = new THREE.MeshBasicMaterial({
-      color: 0xff66ff,
+      color: this.mesh.material.color, // 使用与子弹主体相同的颜色
       transparent: true,
       opacity: 0.6,
       depthWrite: false
@@ -129,7 +133,7 @@ export class HomingBullet extends BaseEnemyBullet {
     const particle = new THREE.Mesh(particleGeometry, particleMaterial);
     // 尾迹粒子稍微滞后于子弹位置
     particle.position.copy(this.mesh.position.clone().add(
-      this.velocity.clone().normalize().multiplyScalar(-2)
+      this.velocity.clone().normalize().multiplyScalar(-1.5)
     ));
     this.scene.add(particle);
 
@@ -146,8 +150,8 @@ export class HomingBullet extends BaseEnemyBullet {
     if (this.trailParticles.length > this.maxTrailParticles) {
       const oldParticle = this.trailParticles.shift();
       this.scene.remove(oldParticle.mesh);
-      oldParticle.mesh.geometry.dispose();
-      oldParticle.mesh.material.dispose();
+      if (oldParticle.mesh.geometry) oldParticle.mesh.geometry.dispose();
+      if (oldParticle.mesh.material) oldParticle.mesh.material.dispose();
     }
   }
 
