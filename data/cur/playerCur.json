@@ -2,7 +2,7 @@
   "health": 100,
   "maxHealth": 100,
   "shields": 0,
-  "bombs": 4957,
+  "bombs": 3,
   "lives": 2,
   "power": 0,
   "maxPower": 400,
@@ -18,6 +18,6 @@
     "z": 0
   },
   "upgrades": [],
-  "modelPath": "models/project_-_koishi_komeiji_fumo_v2.glb",
-  "modelScale": 4.4
+  "modelPath": "models/project_-_doremy_sweet_fumo_model.glb",
+  "modelScale": 3.4
 }
