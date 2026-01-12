@@ -134,9 +134,6 @@ async function init() {
     try {
       await storage.save('playerCur.json', playerCur);
 
-      if (currentWeaponCard) {
-        tempGlobalData.deck[currentWeaponCard.id] = (tempGlobalData.deck[currentWeaponCard.id] || 0) - 1;
-      }
       currentPassiveCards.forEach(card => {
         tempGlobalData.deck[card.id] = (tempGlobalData.deck[card.id] || 0) - 1;
       });

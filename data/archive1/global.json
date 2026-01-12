@@ -1,19 +1,30 @@
 {
-  "money": 100,
+  "money": 1088,
   "health": 100,
-  "bomb": 1,
+  "bomb": 2,
   "currentPath": [
-    "0-1"
+    "0-0",
+    "1-1",
+    "2-0",
+    "3-0",
+    "4-0",
+    "5-1"
   ],
   "deck": {
-    "weapon001": 0,
-    "passive001": 1,
-    "passive002": 1
+    "weapon001": 1,
+    "passive001": 2,
+    "passive002": 2,
+    "passive003": 5,
+    "passive007": 1,
+    "passive006": 4,
+    "passive004": 1,
+    "passive005": 2,
+    "passive008": 1
   },
-  "max_passive_slots": 2,
-  "max_energy": 3,
-  "modelPath": "models/project_-_doremy_sweet_fumo_model.glb",
-  "modelScale": 3.4,
+  "max_passive_slots": 3,
+  "max_energy": 5,
+  "modelPath": "models/project_-_tewi_fumo_model.glb",
+  "modelScale": 11,
   "map": {
     "layers": [
       [
@@ -40,56 +51,44 @@
           "type": "normal",
           "layer": 0,
           "index": 3
-        },
-        {
-          "id": "0-4",
-          "type": "normal",
-          "layer": 0,
-          "index": 4
         }
       ],
       [
         {
           "id": "1-0",
-          "type": "normal",
+          "type": "elite",
           "layer": 1,
           "index": 0
         },
         {
           "id": "1-1",
-          "type": "event",
+          "type": "normal",
           "layer": 1,
           "index": 1
         },
         {
           "id": "1-2",
-          "type": "normal",
+          "type": "elite",
           "layer": 1,
           "index": 2
         },
         {
           "id": "1-3",
-          "type": "normal",
+          "type": "rest",
           "layer": 1,
           "index": 3
         },
         {
           "id": "1-4",
-          "type": "elite",
+          "type": "shop",
           "layer": 1,
           "index": 4
-        },
-        {
-          "id": "1-5",
-          "type": "event",
-          "layer": 1,
-          "index": 5
         }
       ],
       [
         {
           "id": "2-0",
-          "type": "event",
+          "type": "elite",
           "layer": 2,
           "index": 0
         },
@@ -101,7 +100,7 @@
         },
         {
           "id": "2-2",
-          "type": "rest",
+          "type": "event",
           "layer": 2,
           "index": 2
         }
@@ -109,19 +108,19 @@
       [
         {
           "id": "3-0",
-          "type": "normal",
+          "type": "event",
           "layer": 3,
           "index": 0
         },
         {
           "id": "3-1",
-          "type": "normal",
+          "type": "elite",
           "layer": 3,
           "index": 1
         },
         {
           "id": "3-2",
-          "type": "rest",
+          "type": "normal",
           "layer": 3,
           "index": 2
         },
@@ -130,24 +129,18 @@
           "type": "normal",
           "layer": 3,
           "index": 3
-        },
-        {
-          "id": "3-4",
-          "type": "elite",
-          "layer": 3,
-          "index": 4
         }
       ],
       [
         {
           "id": "4-0",
-          "type": "elite",
+          "type": "normal",
           "layer": 4,
           "index": 0
         },
         {
           "id": "4-1",
-          "type": "normal",
+          "type": "rest",
           "layer": 4,
           "index": 1
         },
@@ -156,24 +149,12 @@
           "type": "normal",
           "layer": 4,
           "index": 2
-        },
-        {
-          "id": "4-3",
-          "type": "rest",
-          "layer": 4,
-          "index": 3
-        },
-        {
-          "id": "4-4",
-          "type": "event",
-          "layer": 4,
-          "index": 4
         }
       ],
       [
         {
           "id": "5-0",
-          "type": "shop",
+          "type": "normal",
           "layer": 5,
           "index": 0
         },
@@ -185,7 +166,7 @@
         },
         {
           "id": "5-2",
-          "type": "elite",
+          "type": "normal",
           "layer": 5,
           "index": 2
         }
@@ -193,19 +174,19 @@
       [
         {
           "id": "6-0",
-          "type": "rest",
+          "type": "event",
           "layer": 6,
           "index": 0
         },
         {
           "id": "6-1",
-          "type": "normal",
+          "type": "rest",
           "layer": 6,
           "index": 1
         },
         {
           "id": "6-2",
-          "type": "normal",
+          "type": "elite",
           "layer": 6,
           "index": 2
         },
@@ -217,13 +198,13 @@
         },
         {
           "id": "6-4",
-          "type": "normal",
+          "type": "elite",
           "layer": 6,
           "index": 4
         },
         {
           "id": "6-5",
-          "type": "rest",
+          "type": "event",
           "layer": 6,
           "index": 5
         }
@@ -303,14 +284,6 @@
         "to": "1-4"
       },
       {
-        "from": "0-4",
-        "to": "1-4"
-      },
-      {
-        "from": "0-4",
-        "to": "1-5"
-      },
-      {
         "from": "1-0",
         "to": "2-0"
       },
@@ -320,18 +293,14 @@
       },
       {
         "from": "1-2",
-        "to": "2-0"
-      },
-      {
-        "from": "1-3",
-        "to": "2-0"
-      },
-      {
-        "from": "1-4",
         "to": "2-1"
       },
       {
-        "from": "1-5",
+        "from": "1-3",
+        "to": "2-2"
+      },
+      {
+        "from": "1-4",
         "to": "2-2"
       },
       {
@@ -344,27 +313,19 @@
       },
       {
         "from": "2-1",
+        "to": "3-1"
+      },
+      {
+        "from": "2-2",
         "to": "3-2"
       },
       {
-        "from": "2-1",
-        "to": "3-3"
-      },
-      {
         "from": "2-2",
         "to": "3-3"
-      },
-      {
-        "from": "2-2",
-        "to": "3-4"
       },
       {
         "from": "3-0",
         "to": "4-0"
-      },
-      {
-        "from": "3-0",
-        "to": "4-1"
       },
       {
         "from": "3-1",
@@ -375,39 +336,35 @@
         "to": "4-1"
       },
       {
-        "from": "3-3",
+        "from": "3-2",
         "to": "4-2"
       },
       {
-        "from": "3-4",
-        "to": "4-3"
-      },
-      {
-        "from": "3-4",
-        "to": "4-4"
+        "from": "3-3",
+        "to": "4-2"
       },
       {
         "from": "4-0",
         "to": "5-0"
       },
       {
-        "from": "4-1",
-        "to": "5-0"
-      },
-      {
-        "from": "4-2",
-        "to": "5-0"
-      },
-      {
-        "from": "4-3",
-        "to": "5-0"
-      },
-      {
-        "from": "4-3",
+        "from": "4-0",
         "to": "5-1"
       },
       {
-        "from": "4-4",
+        "from": "4-1",
+        "to": "5-1"
+      },
+      {
+        "from": "4-1",
+        "to": "5-2"
+      },
+      {
+        "from": "4-2",
+        "to": "5-2"
+      },
+      {
+        "from": "4-2",
         "to": "5-2"
       },
       {
@@ -447,6 +404,10 @@
         "to": "7-1"
       },
       {
+        "from": "6-1",
+        "to": "7-2"
+      },
+      {
         "from": "6-2",
         "to": "7-2"
       },
@@ -455,12 +416,12 @@
         "to": "7-2"
       },
       {
-        "from": "6-4",
+        "from": "6-3",
         "to": "7-3"
       },
       {
-        "from": "6-5",
-        "to": "7-3"
+        "from": "6-4",
+        "to": "7-4"
       },
       {
         "from": "6-5",
@@ -489,5 +450,5 @@
     ]
   },
   "bossDefeated": false,
-  "currentStatus": "battle"
+  "currentStatus": "select"
 }
